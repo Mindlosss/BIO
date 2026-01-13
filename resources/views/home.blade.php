@@ -6,7 +6,7 @@
         <title>{{ config('app.name', 'Firefly') }}</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-page="bio-sim" class="min-h-screen">
+    <body data-page="bio-sim" data-sim3d-url="{{ route('sim.3d') }}" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
@@ -109,6 +109,10 @@
                                 </div>
                                 <input id="psoC2" type="range" min="0.5" max="3" step="0.05" value="1.7"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
+                                <button type="button" data-open-3d
+                                    class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Abrir 3D real
+                                </button>
                             </div>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="firefly">
                                 <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]">
@@ -129,6 +133,10 @@
                                 </div>
                                 <input id="ffAlpha" type="range" min="0" max="0.8" step="0.05" value="0.25"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
+                                <button type="button" data-open-3d
+                                    class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Abrir 3D real
+                                </button>
                             </div>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="ga">
                                 <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]">
@@ -149,6 +157,10 @@
                                 </div>
                                 <input id="gaCross" type="range" min="0" max="1" step="0.05" value="0.6"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
+                                <button type="button" data-open-3d
+                                    class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Abrir 3D real
+                                </button>
                             </div>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="cuckoo">
                                 <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]">
@@ -163,6 +175,10 @@
                                 </div>
                                 <input id="ckStep" type="range" min="0.1" max="1.2" step="0.05" value="0.7"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
+                                <button type="button" data-open-3d
+                                    class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Abrir 3D real
+                                </button>
                             </div>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="aco">
                                 <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]">
@@ -183,6 +199,10 @@
                                 </div>
                                 <input id="acoBeta" type="range" min="0.5" max="4" step="0.1" value="2.0"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
+                                <button type="button" data-open-3d
+                                    class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Abrir 3D real
+                                </button>
                             </div>
                         </div>
 

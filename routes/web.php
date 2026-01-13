@@ -17,6 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/comparison', function () {
         return view('comparison');
     })->name('comparison');
+
+    Route::get('/sim/3d', function () {
+        return view('sim-3d');
+    })->name('sim.3d');
 });
 
 
