@@ -5,24 +5,25 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <title>{{ config('app.name', 'Firefly') }}</title>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    <body data-page="bio-landing" class="min-h-screen antialiased">
+        <div class="mx-auto grid min-h-screen w-[min(96vw,520px)] max-w-[520px] place-content-center gap-6 px-5 py-10">
+            <div class="flex items-center justify-between">
+                <a href="{{ route('landing') }}"
+                    class="font-mono text-xs uppercase tracking-[0.35em] text-[rgb(43,209,167)]">
+                    Firefly
+                </a>
+                <a href="{{ route('landing') }}"
+                    class="rounded-full border border-white/10 px-3 py-1 text-xs text-[color:var(--ink-dim)]">
+                    Volver
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="rounded-[22px] border border-white/10 bg-[rgba(17,25,22,0.72)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[14px]">
                 {{ $slot }}
             </div>
         </div>

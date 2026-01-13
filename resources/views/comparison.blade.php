@@ -3,21 +3,22 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'BIO Lab') }} - Comparacion</title>
+        <title>{{ config('app.name', 'Firefly') }} - Comparacion</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body data-page="bio-compare" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
+            @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
-                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">BIO Lab Comparacion</div>
+                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Firefly Comparacion</div>
                     <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
                         Compara algoritmos bioinspirados en la misma funcion objetivo con vistas 2D, 3D y grafica
                         de convergencia para cada algoritmo.
                     </div>
                 </div>
                 <a class="rounded-full border border-[rgba(255,122,26,0.5)] bg-[rgba(255,122,26,0.18)] px-3 py-2 text-sm text-[color:var(--ink)]"
-                    href="{{ url('/') }}">
+                    href="{{ route('home') }}">
                     Modo normal
                 </a>
             </header>
