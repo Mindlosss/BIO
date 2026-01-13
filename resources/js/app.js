@@ -1436,13 +1436,13 @@ if (!isSim && ui.comparePso) {
     });
 }
 
-[ui.psoW, ui.psoC1, ui.psoC2, ui.ffBeta, ui.ffGamma, ui.ffAlpha, ui.gaElite, ui.gaMut, ui.gaCross, ui.ckPa, ui.ckStep].forEach(
-    (input) => {
+[ui.psoW, ui.psoC1, ui.psoC2, ui.ffBeta, ui.ffGamma, ui.ffAlpha, ui.gaElite, ui.gaMut, ui.gaCross, ui.ckPa, ui.ckStep]
+    .filter(Boolean)
+    .forEach((input) => {
         input.addEventListener('input', () => {
             syncParamLabels();
         });
-    }
-);
+    });
 
 window.addEventListener('resize', resizeAll);
 
