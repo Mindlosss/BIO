@@ -111,7 +111,7 @@
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
                                 <button type="button" data-open-3d
                                     class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
-                                    Abrir 3D real
+                                    Abrir 3D
                                 </button>
                             </div>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="firefly">

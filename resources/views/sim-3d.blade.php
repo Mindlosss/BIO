@@ -12,7 +12,7 @@
 
             <div class="grid gap-4 rounded-[18px] border border-white/10 bg-[rgba(16,23,20,0.68)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[8px]">
                 <div class="flex flex-wrap items-center justify-between gap-3 text-[color:var(--ink-dim)]">
-                    <div class="text-sm uppercase tracking-[0.25em]">Simulacion 3D real</div>
+                    <div class="text-sm uppercase tracking-[0.25em]">Simulacion 3D</div>
                     <button type="button"
                         class="rounded-full border border-white/10 px-3 py-1 text-xs text-[color:var(--ink-dim)]"
                         onclick="window.close(); setTimeout(() => { if (!window.closed) window.location.href = '{{ route('home') }}'; }, 150);">
