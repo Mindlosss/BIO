@@ -1,6 +1,6 @@
 <nav class="flex flex-wrap items-center justify-between gap-4 rounded-[18px] border border-white/10 bg-[rgba(17,25,22,0.72)] px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-[12px]">
     <div class="flex flex-wrap items-center gap-4">
-        <a href="{{ route('home') }}" class="font-mono text-xs uppercase tracking-[0.35em] text-[rgb(43,209,167)]">
+        <a href="{{ route('home') }}" class="font-mono text-s uppercase tracking-[0.35em] text-[rgb(43,209,167)]">
             Firefly
         </a>
         <div class="hidden items-center gap-3 text-xs text-[color:var(--ink-dim)] sm:flex">

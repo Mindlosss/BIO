@@ -11,7 +11,7 @@
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
-                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Firefly Simulator</div>
+                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Simulator</div>
                     <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
                         Simulador de algoritmos bioinspirados con vista 2D, vista 3D y grafica de convergencia.
                         Elige el algoritmo y la funcion objetivo, define el modo de convergencia y personaliza
