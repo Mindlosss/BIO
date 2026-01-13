@@ -83,13 +83,13 @@
                     </div>
                     <div class="control-group">
                         <label for="iterations">Iteraciones</label>
-                        <input id="iterations" type="number" min="10" max="5000" step="10" value="300">
+                        <input id="iterations" type="number" min="10" max="5000" step="10" value="100">
                     </div>
                     <div class="control-group">
                         <label for="speed">Velocidad (camara lenta)</label>
                         <div class="range-row">
-                            <input id="speed" type="range" min="0.25" max="8" step="0.25" value="2">
-                            <span id="speedValue">2x</span>
+                            <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1">
+                            <span id="speedValue">1x</span>
                         </div>
                     </div>
 
