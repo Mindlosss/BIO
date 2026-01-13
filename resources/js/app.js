@@ -901,30 +901,34 @@ function createComparisonCards(algos) {
     const preset = getPresetForMode(ui.convergence ? ui.convergence.value : 'equilibrado');
     return algos.map((algo) => {
         const card = document.createElement('div');
-        card.className = 'comparison-card';
+        card.className =
+            'relative flex w-full min-w-[260px] flex-1 flex-col gap-3 rounded-[16px] border border-white/10 bg-[rgba(12,18,16,0.6)] p-3';
         const titleRow = document.createElement('div');
-        titleRow.className = 'comparison-title-row';
+        titleRow.className = 'flex items-center justify-between gap-2';
         const title = document.createElement('div');
-        title.className = 'comparison-title';
+        title.className = 'text-xs uppercase tracking-[0.15em] text-[color:var(--ink-dim)]';
         title.textContent = algoInfo[algo].tag;
         const toggle = document.createElement('button');
         toggle.type = 'button';
-        toggle.className = 'config-toggle';
+        toggle.className =
+            'h-7 w-7 rounded-lg border border-white/15 bg-[rgba(12,18,16,0.6)] text-xs text-[color:var(--ink-dim)] transition';
         toggle.textContent = 'v';
         toggle.setAttribute('aria-expanded', 'false');
         titleRow.appendChild(title);
         titleRow.appendChild(toggle);
 
         const config = document.createElement('div');
-        config.className = 'comparison-config';
+        config.className =
+            'absolute right-3 top-10 hidden w-[min(240px,88%)] grid gap-2 rounded-xl border border-white/15 bg-[rgba(10,16,14,0.95)] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.45)]';
         const configInputs = { inputs: {}, values: {} };
 
         const addRange = (key, label, min, max, step, value) => {
             const row = document.createElement('div');
-            row.className = 'param-row';
+            row.className = 'flex items-center justify-between text-xs text-[color:var(--ink-dim)]';
             const labelSpan = document.createElement('span');
             labelSpan.textContent = label;
             const valueSpan = document.createElement('span');
+            valueSpan.className = 'font-mono text-[rgb(43,209,167)]';
             valueSpan.textContent = Number(value).toFixed(2);
             row.appendChild(labelSpan);
             row.appendChild(valueSpan);
@@ -935,6 +939,7 @@ function createComparisonCards(algos) {
             input.max = max;
             input.step = step;
             input.value = value;
+            input.className = 'h-9 w-full accent-[rgb(255,122,26)]';
 
             config.appendChild(row);
             config.appendChild(input);
@@ -964,30 +969,34 @@ function createComparisonCards(algos) {
         }
 
         toggle.addEventListener('click', () => {
-            const isOpen = config.classList.toggle('is-open');
-            toggle.classList.toggle('is-open', isOpen);
-            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            const isHidden = config.classList.toggle('hidden');
+            toggle.classList.toggle('rotate-180', !isHidden);
+            toggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
             resizeComparisonCanvases();
             drawComparisonViews();
         });
 
         const label2d = document.createElement('div');
-        label2d.className = 'comparison-label';
+        label2d.className = 'text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-dim)]';
         label2d.textContent = 'Vista 2D';
         const canvas2d = document.createElement('canvas');
-        canvas2d.className = 'comparison-canvas';
+        canvas2d.className =
+            'h-40 w-full rounded-[12px] border border-white/10 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.08),transparent_55%),rgba(8,12,10,0.85)]';
         const label3d = document.createElement('div');
-        label3d.className = 'comparison-label';
+        label3d.className = 'text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-dim)]';
         label3d.textContent = 'Vista 3D';
         const canvas3d = document.createElement('canvas');
-        canvas3d.className = 'comparison-canvas';
+        canvas3d.className =
+            'h-40 w-full rounded-[12px] border border-white/10 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.08),transparent_55%),rgba(8,12,10,0.85)]';
         const labelChart = document.createElement('div');
-        labelChart.className = 'comparison-label';
+        labelChart.className = 'text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-dim)]';
         labelChart.textContent = 'Convergencia';
         const canvasChart = document.createElement('canvas');
-        canvasChart.className = 'comparison-chart';
+        canvasChart.className =
+            'h-32 w-full rounded-[12px] border border-white/10 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.08),transparent_55%),rgba(8,12,10,0.85)]';
         const stats = document.createElement('div');
-        stats.className = 'comparison-stats';
+        stats.className =
+            'grid gap-1 rounded-[10px] border border-white/10 bg-[rgba(10,16,14,0.7)] p-2 font-mono text-[0.7rem] text-[color:var(--ink-dim)]';
         const iter = document.createElement('div');
         iter.textContent = 'Iter: 0';
         const bestF = document.createElement('div');
