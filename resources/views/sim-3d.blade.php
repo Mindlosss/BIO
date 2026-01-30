@@ -27,6 +27,7 @@
                         <div>Funcion: <span id="objectiveLabel" class="text-[color:var(--ink)]">-</span></div>
                         <div>Iteracion: <span id="iterLabel" class="text-[color:var(--ink)]">0</span></div>
                         <div>Mejor f: <span id="bestLabel" class="text-[color:var(--ink)]">-</span></div>
+                        <div id="legend" class="flex flex-wrap items-center gap-3 text-xs text-[color:var(--ink-dim)]"></div>
                         <div class="text-xs text-[color:var(--ink-dim)]">
                             Usa el mouse para rotar, zoom y mover la escena.
                         </div>

@@ -43,6 +43,7 @@ export async function initThreeView() {
     };
 
     const objectiveFn = objectiveFns[objective] || objectiveFns.sphere;
+    const agentColor = 0x2bd1a7;
 
     const [
         {
@@ -132,10 +133,17 @@ export async function initThreeView() {
     scene.add(wireframe);
 
     const agentGeometry = new SphereGeometry(Math.max(0.08, bounds * 0.03), 16, 16);
-    const agentMaterial = new MeshStandardMaterial({ color: 0xff7a1a });
+    const agentMaterial = new MeshStandardMaterial({ color: agentColor });
     const agents = new InstancedMesh(agentGeometry, agentMaterial, pop);
     const dummy = new Object3D();
     scene.add(agents);
+    const bestMaterial = new MeshStandardMaterial({
+        color: 0xffe8b5,
+        emissive: 0xffd28a,
+        emissiveIntensity: 0.4
+    });
+    const bestMesh = new Mesh(new SphereGeometry(Math.max(0.12, bounds * 0.045), 18, 18), bestMaterial);
+    scene.add(bestMesh);
 
     const state = {
         bounds,
@@ -309,6 +317,13 @@ export async function initThreeView() {
             agents.setMatrixAt(index, dummy.matrix);
         });
         agents.instanceMatrix.needsUpdate = true;
+        if (state.best) {
+            const bestHeight = mapHeight(objectiveFn(state.best.x, state.best.y));
+            bestMesh.position.set(state.best.x, bestHeight, state.best.y);
+            bestMesh.visible = true;
+        } else {
+            bestMesh.visible = false;
+        }
     };
 
     const algoLabel = document.getElementById('algoLabel');
@@ -318,6 +333,20 @@ export async function initThreeView() {
 
     if (algoLabel) algoLabel.textContent = algo.toUpperCase();
     if (objectiveLabel) objectiveLabel.textContent = objective;
+    const legend = document.getElementById('legend');
+    if (legend) {
+        const colorHex = `#${agentColor.toString(16).padStart(6, '0')}`;
+        legend.innerHTML = `
+            <span class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full" style="background:${colorHex}"></span>
+                Agentes
+            </span>
+            <span class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full" style="background:rgba(255, 232, 181, 0.95)"></span>
+                Mejor agente
+            </span>
+        `;
+    }
 
     const resize = () => {
         const rect = rootEl.getBoundingClientRect();

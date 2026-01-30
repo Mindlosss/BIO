@@ -44,22 +44,41 @@ const drawGrid = (ctx, canvas) => {
     }
 };
 
-export const draw2DState = (simState, ctx, canvas) => {
+const normalizeColor = (color) => {
+    if (!color || typeof color !== 'string') {
+        return { r: 43, g: 209, b: 167 };
+    }
+    if (color.startsWith('#')) {
+        const hex = color.length === 4
+            ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}`
+            : color;
+        const value = Number.parseInt(hex.slice(1), 16);
+        return {
+            r: (value >> 16) & 255,
+            g: (value >> 8) & 255,
+            b: value & 255
+        };
+    }
+    return { r: 43, g: 209, b: 167 };
+};
+
+export const draw2DState = (simState, ctx, canvas, color, bestColor = 'rgba(255, 232, 181, 0.95)') => {
     if (!ctx || !canvas) {
         return;
     }
     drawGrid(ctx, canvas);
+    const { r, g, b } = normalizeColor(color);
     simState.particles.forEach((p) => {
         const pos = toCanvasCoords(p.x, p.y, canvas, simState.bounds);
         const intensity = Math.min(1, p.f / (simState.best.f + 0.0001));
-        ctx.fillStyle = `rgba(43, 209, 167, ${0.2 + 0.6 * (1 - intensity)})`;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.2 + 0.6 * (1 - intensity)})`;
         ctx.beginPath();
         ctx.arc(pos.cx, pos.cy, 4, 0, Math.PI * 2);
         ctx.fill();
     });
     if (simState.best) {
         const bestPos = toCanvasCoords(simState.best.x, simState.best.y, canvas, simState.bounds);
-        ctx.strokeStyle = 'rgba(255, 122, 26, 0.9)';
+        ctx.strokeStyle = bestColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(bestPos.cx - 8, bestPos.cy);
@@ -76,7 +95,15 @@ const projectIso = (x, y, z, centerX, centerY, scale, heightScale) => {
     return { isoX, isoY };
 };
 
-export const draw3DState = (simState, ctx, canvas, objectiveFns, surfaceMode) => {
+export const draw3DState = (
+    simState,
+    ctx,
+    canvas,
+    objectiveFns,
+    surfaceMode,
+    color,
+    bestColor = 'rgba(255, 232, 181, 0.95)'
+) => {
     if (!ctx || !canvas) {
         return;
     }
@@ -141,16 +168,31 @@ export const draw3DState = (simState, ctx, canvas, objectiveFns, surfaceMode) =>
         ctx.stroke();
     }
 
+    const { r, g, b } = normalizeColor(color);
     simState.particles.forEach((p) => {
         const f = objectiveFns[simState.objective](p.x, p.y);
         const z = mapZ(f);
         const pt = projectIso(p.x, p.y, z, centerX, centerY, scale, 6);
         const intensity = Math.min(1, f / (simState.best.f + 0.0001));
-        ctx.fillStyle = `rgba(43, 209, 167, ${0.25 + 0.7 * (1 - intensity)})`;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.25 + 0.7 * (1 - intensity)})`;
         ctx.beginPath();
         ctx.arc(pt.isoX, pt.isoY, 4, 0, Math.PI * 2);
         ctx.fill();
     });
+    if (simState.best) {
+        const bestF = objectiveFns[simState.objective](simState.best.x, simState.best.y);
+        const bestZ = mapZ(bestF);
+        const bestPoint = projectIso(simState.best.x, simState.best.y, bestZ, centerX, centerY, scale, 6);
+        ctx.strokeStyle = bestColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(bestPoint.isoX, bestPoint.isoY, 7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = bestColor;
+        ctx.beginPath();
+        ctx.arc(bestPoint.isoX, bestPoint.isoY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
 };
 
 export const drawChartWithValues = (ctx, canvas, history, strokeColor) => {

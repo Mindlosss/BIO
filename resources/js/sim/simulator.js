@@ -101,6 +101,8 @@ export function initSimulator({ root, isSim, isCompare }) {
             desc: 'Hormigas virtuales refuerzan caminos con feromonas hacia mejores soluciones.'
         }
     };
+    const agentColor = '#2bd1a7';
+    const bestColor = 'rgba(255, 232, 181, 0.95)';
 
     const state = {
         bounds: Number(ui.bounds ? ui.bounds.value : 5),
@@ -366,16 +368,16 @@ export function initSimulator({ root, isSim, isCompare }) {
     };
 
     const draw2D = () => {
-        draw2DState(state, ctx2d, canvases.view2d);
+        draw2DState(state, ctx2d, canvases.view2d, agentColor, bestColor);
     };
 
     const draw3D = () => {
         const surfaceMode = ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth';
-        draw3DState(state, ctx3d, canvases.view3d, objectiveFns, surfaceMode);
+        draw3DState(state, ctx3d, canvases.view3d, objectiveFns, surfaceMode, agentColor, bestColor);
     };
 
     const drawChart = () => {
-        drawChartWithValues(ctxChart, canvases.chart, state.history, 'rgba(255, 122, 26, 0.85)');
+        drawChartWithValues(ctxChart, canvases.chart, state.history, agentColor);
     };
 
     const drawAll = () => {
@@ -475,6 +477,18 @@ export function initSimulator({ root, isSim, isCompare }) {
         }
         if (ui.algoDesc) {
             ui.algoDesc.textContent = algoInfo[state.algo].desc;
+        }
+        if (ui.chartLegend) {
+            ui.chartLegend.innerHTML = `
+                <span class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background:${agentColor}"></span>
+                    Agentes
+                </span>
+                <span class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background:${bestColor}"></span>
+                    Mejor agente
+                </span>
+            `;
         }
         if (ui.domainTag) {
             ui.domainTag.textContent = `Dominio: [-${state.bounds}, ${state.bounds}]`;
@@ -682,4 +696,3 @@ export function initSimulator({ root, isSim, isCompare }) {
         comparison.stopComparisonLoop();
     }
 }
-
