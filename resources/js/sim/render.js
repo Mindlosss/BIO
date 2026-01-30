@@ -62,22 +62,92 @@ const normalizeColor = (color) => {
     return { r: 43, g: 209, b: 167 };
 };
 
-export const draw2DState = (simState, ctx, canvas, color, bestColor = 'rgba(255, 232, 181, 0.95)') => {
+const mixColors = (a, b, t, alpha = 1) => {
+    const r = Math.round(a.r + (b.r - a.r) * t);
+    const g = Math.round(a.g + (b.g - a.g) * t);
+    const bVal = Math.round(a.b + (b.b - a.b) * t);
+    return `rgba(${r}, ${g}, ${bVal}, ${alpha})`;
+};
+
+const resolveValueRange = (values) => {
+    if (!values.length) {
+        return { min: 0, max: 1, range: 1 };
+    }
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    return { min, max, range: max - min || 1 };
+};
+
+const drawTrails = (ctx, canvas, trails, bounds, color, alpha = 0.35) => {
+    if (!trails || trails.length === 0) {
+        return;
+    }
+    const base = normalizeColor(color);
+    ctx.strokeStyle = mixColors(base, base, 0, alpha);
+    ctx.lineWidth = 1;
+    trails.forEach((trail) => {
+        if (!trail || trail.length < 2) {
+            return;
+        }
+        ctx.beginPath();
+        trail.forEach((point, index) => {
+            const pos = toCanvasCoords(point.x, point.y, canvas, bounds);
+            if (index === 0) {
+                ctx.moveTo(pos.cx, pos.cy);
+            } else {
+                ctx.lineTo(pos.cx, pos.cy);
+            }
+        });
+        ctx.stroke();
+    });
+};
+
+export const draw2DState = (
+    simState,
+    ctx,
+    canvas,
+    color,
+    bestColor = 'rgba(255, 232, 181, 0.95)',
+    options = {}
+) => {
     if (!ctx || !canvas) {
         return;
     }
     drawGrid(ctx, canvas);
-    const { r, g, b } = normalizeColor(color);
+    const showTrails = options.showTrails !== false;
+    if (showTrails) {
+        drawTrails(ctx, canvas, simState.trails, simState.bounds, color, 0.28);
+    }
+    const base = normalizeColor(color);
+    const bestTone = normalizeColor('#ffd28a');
+    const speedValues = simState.particles.map((p) => Math.hypot(p.vx || 0, p.vy || 0));
+    const fitnessValues = simState.particles.map((p) => p.f);
+    const speedRange = resolveValueRange(speedValues);
+    const fitnessRange = resolveValueRange(fitnessValues);
+    const colorMode = 'fitness';
+
     simState.particles.forEach((p) => {
         const pos = toCanvasCoords(p.x, p.y, canvas, simState.bounds);
-        const intensity = Math.min(1, p.f / (simState.best.f + 0.0001));
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.2 + 0.6 * (1 - intensity)})`;
+        const intensity =
+            colorMode === 'speed'
+                ? (Math.hypot(p.vx || 0, p.vy || 0) - speedRange.min) / speedRange.range
+                : (p.f - fitnessRange.min) / fitnessRange.range;
+        const blend = colorMode === 'speed' ? intensity : 1 - intensity;
+        ctx.fillStyle = mixColors(base, bestTone, blend, 0.25 + 0.7 * (1 - intensity));
         ctx.beginPath();
         ctx.arc(pos.cx, pos.cy, 4, 0, Math.PI * 2);
         ctx.fill();
     });
     if (simState.best) {
         const bestPos = toCanvasCoords(simState.best.x, simState.best.y, canvas, simState.bounds);
+        const glow = ctx.createRadialGradient(bestPos.cx, bestPos.cy, 2, bestPos.cx, bestPos.cy, 18);
+        glow.addColorStop(0, 'rgba(255, 210, 138, 0.6)');
+        glow.addColorStop(1, 'rgba(255, 210, 138, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(bestPos.cx, bestPos.cy, 18, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.strokeStyle = bestColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -102,7 +172,8 @@ export const draw3DState = (
     objectiveFns,
     surfaceMode,
     color,
-    bestColor = 'rgba(255, 232, 181, 0.95)'
+    bestColor = 'rgba(255, 232, 181, 0.95)',
+    options = {}
 ) => {
     if (!ctx || !canvas) {
         return;
@@ -168,13 +239,47 @@ export const draw3DState = (
         ctx.stroke();
     }
 
-    const { r, g, b } = normalizeColor(color);
+    const showTrails = options.showTrails !== false;
+    const base = normalizeColor(color);
+    const bestTone = normalizeColor('#ffd28a');
+    const speedValues = simState.particles.map((p) => Math.hypot(p.vx || 0, p.vy || 0));
+    const fitnessValues = simState.particles.map((p) => p.f);
+    const speedRange = resolveValueRange(speedValues);
+    const fitnessRange = resolveValueRange(fitnessValues);
+    const colorMode = 'fitness';
+
+    if (showTrails && simState.trails && simState.trails.length > 0) {
+        ctx.strokeStyle = mixColors(base, base, 0, 0.22);
+        ctx.lineWidth = 1;
+        simState.trails.forEach((trail) => {
+            if (!trail || trail.length < 2) {
+                return;
+            }
+            ctx.beginPath();
+            trail.forEach((point, index) => {
+                const f = objectiveFns[simState.objective](point.x, point.y);
+                const z = mapZ(f);
+                const pt = projectIso(point.x, point.y, z, centerX, centerY, scale, 6);
+                if (index === 0) {
+                    ctx.moveTo(pt.isoX, pt.isoY);
+                } else {
+                    ctx.lineTo(pt.isoX, pt.isoY);
+                }
+            });
+            ctx.stroke();
+        });
+    }
+
     simState.particles.forEach((p) => {
         const f = objectiveFns[simState.objective](p.x, p.y);
         const z = mapZ(f);
         const pt = projectIso(p.x, p.y, z, centerX, centerY, scale, 6);
-        const intensity = Math.min(1, f / (simState.best.f + 0.0001));
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.25 + 0.7 * (1 - intensity)})`;
+        const intensity =
+            colorMode === 'speed'
+                ? (Math.hypot(p.vx || 0, p.vy || 0) - speedRange.min) / speedRange.range
+                : (f - fitnessRange.min) / fitnessRange.range;
+        const blend = colorMode === 'speed' ? intensity : 1 - intensity;
+        ctx.fillStyle = mixColors(base, bestTone, blend, 0.25 + 0.7 * (1 - intensity));
         ctx.beginPath();
         ctx.arc(pt.isoX, pt.isoY, 4, 0, Math.PI * 2);
         ctx.fill();
@@ -240,4 +345,29 @@ export const drawChartWithValues = (ctx, canvas, history, strokeColor) => {
         });
         ctx.stroke();
     }
+};
+
+export const drawSparkline = (ctx, canvas, history, strokeColor) => {
+    if (!ctx || !canvas) {
+        return;
+    }
+    const size = canvasSize(canvas);
+    ctx.clearRect(0, 0, size.w, size.h);
+    if (!history.length) {
+        return;
+    }
+    const { min, range } = resolveValueRange(history);
+    ctx.strokeStyle = strokeColor || 'rgba(255, 122, 26, 0.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    history.forEach((val, index) => {
+        const x = (index / Math.max(1, history.length - 1)) * size.w;
+        const y = size.h - ((val - min) / range) * size.h;
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+    ctx.stroke();
 };
