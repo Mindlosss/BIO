@@ -12,7 +12,7 @@ export async function initThreeView() {
     const objective = params.get('objective') || 'sphere';
     const bounds = Number(params.get('bounds') || 5);
     const pop = Math.max(10, Number(params.get('pop') || 60));
-    const speed = Math.max(0.1, Number(params.get('speed') || 1));
+    const speed = Math.max(0.1, Number(params.get('speed') || 0.5));
     const iterations = Math.max(1, Number(params.get('iterations') || 100));
 
     const algoParams = {
