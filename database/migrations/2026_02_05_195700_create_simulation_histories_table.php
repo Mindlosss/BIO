@@ -20,7 +20,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('bounds');
             $table->unsignedSmallInteger('population');
             $table->unsignedSmallInteger('iterations');
-            $table->decimal('speed', 5, 2);
             $table->unsignedBigInteger('seed');
             $table->boolean('show_trails')->default(true);
             $table->string('surface_mode', 16)->nullable();

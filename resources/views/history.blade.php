@@ -42,7 +42,6 @@
                                 <div class="flex flex-wrap gap-2">
                                     <span class="rounded-full border border-white/10 px-2 py-1">Promedio f: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'avg_f') ?? '-' }}</span></span>
                                     <span class="rounded-full border border-white/10 px-2 py-1">Diversidad: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'diversity') ?? '-' }}</span></span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1">Mejora: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'improve') ?? '-' }}</span></span>
                                 </div>
                             </div>
                         </div>

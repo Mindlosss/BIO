@@ -119,11 +119,6 @@
                                 Reset
                             </button>
                         </div>
-                        <div id="stats" class="grid gap-1 rounded-[14px] bg-[rgba(12,18,16,0.6)] p-4 font-mono text-xs text-[color:var(--ink-dim)]">
-                            <div>Iter: <strong id="iter" class="text-[rgb(43,209,167)]">0</strong></div>
-                            <div>Best f: <strong id="bestF" class="text-[rgb(43,209,167)]">-</strong></div>
-                            <div>Best x,y: <strong id="bestXY" class="text-[rgb(43,209,167)]">-</strong></div>
-                        </div>
                         <div class="grid gap-2 text-[0.92rem] text-[color:var(--ink-dim)]">
                             <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>
                             <div id="algoDesc">

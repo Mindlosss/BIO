@@ -38,9 +38,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         bestXY: document.getElementById('bestXY'),
         avgF: document.getElementById('avgF'),
         diversity: document.getElementById('diversity'),
-        improveRate: document.getElementById('improveRate'),
-        exploreLabel: document.getElementById('exploreLabel'),
-        exploreBar: document.getElementById('exploreBar'),
         algoTag: document.getElementById('algoTag'),
         algoDesc: document.getElementById('algoDesc'),
         domainTag: document.getElementById('domainTag'),
@@ -154,8 +151,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         metrics: {
             avgF: null,
             diversity: null,
-            improve: null,
-            exploration: null,
             speedAvg: null
         },
     };
@@ -296,19 +291,9 @@ export function initSimulator({ root, isSim, isCompare }) {
         });
         const diversity = sumDist / count;
 
-        let improve = null;
-        if (state.history.length > 1) {
-            const slice = state.history.slice(-6);
-            const first = slice[0];
-            const last = slice[slice.length - 1];
-            improve = (first - last) / Math.max(Math.abs(first), 1e-6);
-        }
-
         state.metrics = {
             avgF,
             diversity,
-            improve,
-            exploration: Math.min(1, diversity / (state.bounds * 1.1)),
             speedAvg: sumSpeed / count
         };
         state.historyAvg.push(avgF);
@@ -386,8 +371,6 @@ export function initSimulator({ root, isSim, isCompare }) {
             best: state.best ? { ...state.best } : null,
             avg_f: state.metrics.avgF,
             diversity: state.metrics.diversity,
-            improve: state.metrics.improve,
-            exploration: state.metrics.exploration,
             speed_avg: state.metrics.speedAvg,
         },
         history: state.history,
@@ -656,15 +639,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         if (ui.diversity && state.metrics.diversity !== null) {
             ui.diversity.textContent = state.metrics.diversity.toFixed(2);
         }
-        if (ui.improveRate) {
-            const improve = state.metrics.improve;
-            ui.improveRate.textContent = improve === null ? '-' : `${(improve * 100).toFixed(2)}%`;
-        }
-        if (ui.exploreLabel && ui.exploreBar) {
-            const explore = state.metrics.exploration ?? 0;
-            ui.exploreLabel.textContent = explore > 0.6 ? 'Exploracion' : explore > 0.35 ? 'Balance' : 'Explotacion';
-            ui.exploreBar.style.width = `${Math.round(explore * 100)}%`;
-        }
     };
 
     const resizeAll = () => {
@@ -760,11 +734,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         }
         if (ui.domainTag) {
             ui.domainTag.textContent = `Dominio: [-${state.bounds}, ${state.bounds}]`;
-        }
-        if (ui.exploreLabel && ui.exploreBar && ui.convergence) {
-            const convergence = convergenceLabels[ui.convergence.value] || convergenceLabels.equilibrado;
-            ui.exploreLabel.textContent = convergence.label;
-            ui.exploreBar.style.width = `${Math.round(convergence.ratio * 100)}%`;
         }
         syncParamLabels();
         setActiveParam(state.algo);

@@ -242,11 +242,6 @@
                             <div>Best x,y: <strong id="bestXY" class="text-[rgb(43,209,167)]">-</strong></div>
                             <div>Prom f: <strong id="avgF" class="text-[rgb(43,209,167)]">-</strong></div>
                             <div>Diversidad: <strong id="diversity" class="text-[rgb(43,209,167)]">-</strong></div>
-                            <div>Mejora: <strong id="improveRate" class="text-[rgb(43,209,167)]">-</strong></div>
-                            <div>Balance: <strong id="exploreLabel" class="text-[rgb(43,209,167)]">Balance</strong></div>
-                            <div class="h-2 w-full rounded-full bg-[rgba(255,255,255,0.08)]">
-                                <div id="exploreBar" class="h-2 rounded-full bg-[linear-gradient(90deg,#2bd1a7,#ff7a1a)]" style="width:50%"></div>
-                            </div>
                         </div>
                         <div class="grid gap-2 text-[0.92rem] text-[color:var(--ink-dim)]">
                             <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>

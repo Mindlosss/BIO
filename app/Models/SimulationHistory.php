@@ -21,7 +21,6 @@ class SimulationHistory extends Model
         'bounds',
         'population',
         'iterations',
-        'speed',
         'seed',
         'show_trails',
         'surface_mode',
@@ -36,7 +35,6 @@ class SimulationHistory extends Model
     protected function casts(): array
     {
         return [
-            'speed' => 'float',
             'show_trails' => 'boolean',
             'parameters' => 'array',
             'metrics' => 'array',

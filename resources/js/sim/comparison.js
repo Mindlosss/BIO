@@ -74,6 +74,32 @@ export function createComparisonManager({
         localState.history.push(localState.best.f);
     };
 
+    const computeLocalMetrics = (localState) => {
+        const count = localState.particles.length;
+        if (!count) {
+            return;
+        }
+        let sumF = 0;
+        let sumX = 0;
+        let sumY = 0;
+        localState.particles.forEach((p) => {
+            sumF += p.f;
+            sumX += p.x;
+            sumY += p.y;
+        });
+        const avgF = sumF / count;
+        const centerX = sumX / count;
+        const centerY = sumY / count;
+        let sumDist = 0;
+        localState.particles.forEach((p) => {
+            sumDist += Math.hypot(p.x - centerX, p.y - centerY);
+        });
+        localState.metrics = {
+            avgF,
+            diversity: sumDist / count
+        };
+    };
+
     const drawBenchmarkChart = (ctx, canvas, history, color) => {
         const size = canvas.__w || canvas.width;
         if (size === 0) {
@@ -98,6 +124,10 @@ export function createComparisonManager({
                 if (entry.state.best) {
                     entry.stats.bestF.textContent = `Best f: ${entry.state.best.f.toFixed(4)}`;
                     entry.stats.bestXY.textContent = `Best x,y: ${entry.state.best.x.toFixed(2)}, ${entry.state.best.y.toFixed(2)}`;
+                }
+                if (entry.state.metrics) {
+                    entry.stats.avgF.textContent = `Prom f: ${entry.state.metrics.avgF.toFixed(4)}`;
+                    entry.stats.diversity.textContent = `Diversidad: ${entry.state.metrics.diversity.toFixed(2)}`;
                 }
             }
         });
@@ -356,9 +386,15 @@ export function createComparisonManager({
             bestF.textContent = 'Best f: -';
             const bestXY = document.createElement('div');
             bestXY.textContent = 'Best x,y: -';
+            const avgF = document.createElement('div');
+            avgF.textContent = 'Prom f: -';
+            const diversity = document.createElement('div');
+            diversity.textContent = 'Diversidad: -';
             stats.appendChild(iter);
             stats.appendChild(bestF);
             stats.appendChild(bestXY);
+            stats.appendChild(avgF);
+            stats.appendChild(diversity);
 
             card.appendChild(titleRow);
             card.appendChild(legend);
@@ -384,7 +420,9 @@ export function createComparisonManager({
                 stats: {
                     iter,
                     bestF,
-                    bestXY
+                    bestXY,
+                    avgF,
+                    diversity
                 }
             };
         });
@@ -503,9 +541,11 @@ export function createComparisonManager({
                 history: [],
                 iter: 0,
                 rng,
-                random: rng
+                random: rng,
+                metrics: null
             };
             updateBestState(localState);
+            computeLocalMetrics(localState);
             return {
                 algo: card.algo,
                 state: localState,
@@ -565,6 +605,7 @@ export function createComparisonManager({
                     stepACOState(entry.state, entry.params);
                 }
                 updateBestState(entry.state);
+                computeLocalMetrics(entry.state);
                 entry.state.iter += 1;
             });
         };

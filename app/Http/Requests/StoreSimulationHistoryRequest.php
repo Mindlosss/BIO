@@ -39,8 +39,6 @@ class StoreSimulationHistoryRequest extends FormRequest
             'metrics.best.y' => ['nullable', 'numeric'],
             'metrics.avg_f' => ['nullable', 'numeric'],
             'metrics.diversity' => ['nullable', 'numeric'],
-            'metrics.improve' => ['nullable', 'numeric'],
-            'metrics.exploration' => ['nullable', 'numeric'],
             'metrics.speed_avg' => ['nullable', 'numeric'],
             'history' => ['nullable', 'array'],
         ];
