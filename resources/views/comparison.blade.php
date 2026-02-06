@@ -3,15 +3,16 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ config('app.name', 'Firefly') }} - Comparacion</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-page="bio-compare" class="min-h-screen">
+    <body data-page="bio-compare" data-history-url="{{ route('history.store') }}" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
-                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Modo Comparacion</div>
+                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Comparación</div>
                     {{-- <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
                         Compara algoritmos bioinspirados en la misma funcion objetivo con vistas 2D, 3D y grafica
                         de convergencia para cada algoritmo.

@@ -3,6 +3,8 @@ import { createSeededRng } from './utils';
 export function createComparisonManager({
     ui,
     state,
+    historyUrl,
+    csrfToken,
     objectiveFns,
     modePresets,
     draw2DState,
@@ -17,6 +19,9 @@ export function createComparisonManager({
     let comparisonRunning = false;
     let comparisonRafId;
     let comparisonStepBudget = 0;
+    let comparisonRunId = 0;
+    let comparisonBatchId = null;
+    let lastSavedRunId = null;
 
     const comparisonColors = () => ({
         pso: '#2bd1a7',
@@ -82,10 +87,12 @@ export function createComparisonManager({
         let sumF = 0;
         let sumX = 0;
         let sumY = 0;
+        let sumSpeed = 0;
         localState.particles.forEach((p) => {
             sumF += p.f;
             sumX += p.x;
             sumY += p.y;
+            sumSpeed += Math.hypot(p.vx || 0, p.vy || 0);
         });
         const avgF = sumF / count;
         const centerX = sumX / count;
@@ -96,8 +103,58 @@ export function createComparisonManager({
         });
         localState.metrics = {
             avgF,
-            diversity: sumDist / count
+            diversity: sumDist / count,
+            speedAvg: sumSpeed / count
         };
+    };
+
+    const buildHistoryPayload = (entry, iterations) => ({
+        algo: entry.algo,
+        objective: state.objective,
+        convergence: ui.convergence ? ui.convergence.value : null,
+        mode: 'comparison',
+        batch_id: comparisonBatchId,
+        bounds: state.bounds,
+        population: entry.state.particles.length,
+        iterations,
+        seed: state.seed,
+        show_trails: false,
+        surface_mode: ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth',
+        parameters: entry.params,
+        metrics: {
+            best: entry.state.best ? { ...entry.state.best } : null,
+            avg_f: entry.state.metrics?.avgF ?? null,
+            diversity: entry.state.metrics?.diversity ?? null,
+            speed_avg: entry.state.metrics?.speedAvg ?? null,
+        },
+        history: entry.state.history,
+    });
+
+    const persistComparisonHistory = async (iterations) => {
+        if (!historyUrl || !csrfToken || !comparisonStates) {
+            return;
+        }
+        if (lastSavedRunId === comparisonRunId) {
+            return;
+        }
+        try {
+            await Promise.all(
+                comparisonStates.map((entry) =>
+                    fetch(historyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify(buildHistoryPayload(entry, iterations)),
+                    })
+                )
+            );
+            lastSavedRunId = comparisonRunId;
+        } catch (error) {
+            // no-op
+        }
     };
 
     const drawBenchmarkChart = (ctx, canvas, history, color) => {
@@ -525,6 +582,10 @@ export function createComparisonManager({
             }
             return;
         }
+        comparisonRunId += 1;
+        const timePart = (Date.now() % 1_000_000).toString(36).padStart(4, '0');
+        const runPart = comparisonRunId.toString(36);
+        comparisonBatchId = `c${timePart}${runPart}`;
         const baseRng = createSeededRng(state.seed);
         const base = createBasePopulation(Number(ui.pop.value), baseRng);
         const params = getAlgoParams();
@@ -625,6 +686,7 @@ export function createComparisonManager({
             const finished = comparisonStates.every((entry) => entry.state.iter >= iterations);
             if (finished) {
                 comparisonRunning = false;
+                persistComparisonHistory(iterations);
                 return;
             }
             comparisonRafId = requestAnimationFrame(loopComparison);

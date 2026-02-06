@@ -25,6 +25,8 @@ class StoreSimulationHistoryRequest extends FormRequest
             'algo' => ['required', 'string', 'max:32'],
             'objective' => ['required', 'string', 'max:32'],
             'convergence' => ['nullable', 'string', 'max:24'],
+            'mode' => ['nullable', 'string', 'max:16'],
+            'batch_id' => ['nullable', 'string', 'max:40'],
             'bounds' => ['required', 'integer', 'min:1', 'max:100'],
             'population' => ['required', 'integer', 'min:1', 'max:2000'],
             'iterations' => ['required', 'integer', 'min:1', 'max:20000'],

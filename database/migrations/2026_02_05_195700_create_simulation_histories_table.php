@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('algo', 32);
             $table->string('objective', 32);
             $table->string('convergence', 24)->nullable();
+            $table->string('mode', 16)->default('normal');
+            $table->string('batch_id', 40)->nullable();
             $table->unsignedSmallInteger('bounds');
             $table->unsignedSmallInteger('population');
             $table->unsignedSmallInteger('iterations');

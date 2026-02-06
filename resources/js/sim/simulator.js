@@ -31,7 +31,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         toggle: document.getElementById('toggle'),
         step: document.getElementById('step'),
         reset: document.getElementById('reset'),
-        historyStatus: document.getElementById('historyStatus'),
         benchmark: document.getElementById('benchmark'),
         iter: document.getElementById('iter'),
         bestF: document.getElementById('bestF'),
@@ -167,9 +166,15 @@ export function initSimulator({ root, isSim, isCompare }) {
 
     const random = () => (state.rng ? state.rng() : Math.random());
 
+    const sim3dUrl = root && root.dataset ? root.dataset.sim3dUrl : null;
+    const historyUrl = root && root.dataset ? root.dataset.historyUrl : null;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null;
+
     const comparison = createComparisonManager({
         ui,
         state,
+        historyUrl,
+        csrfToken,
         objectiveFns,
         modePresets,
         draw2DState,
@@ -180,10 +185,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         randRange,
         algoInfo
     });
-
-    const sim3dUrl = root && root.dataset ? root.dataset.sim3dUrl : null;
-    const historyUrl = root && root.dataset ? root.dataset.historyUrl : null;
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null;
     let lastSavedRunId = null;
     const open3dButtons = Array.from(document.querySelectorAll('[data-open-3d]'));
     const open3dWindow = () => {
@@ -306,21 +307,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         }
     };
 
-    const setHistoryStatus = (message, tone = 'muted') => {
-        if (!ui.historyStatus) {
-            return;
-        }
-        ui.historyStatus.textContent = message;
-        ui.historyStatus.classList.remove('text-[rgb(43,209,167)]', 'text-[rgb(255,122,26)]', 'text-[color:var(--ink-dim)]');
-        if (tone === 'success') {
-            ui.historyStatus.classList.add('text-[rgb(43,209,167)]');
-        } else if (tone === 'warning') {
-            ui.historyStatus.classList.add('text-[rgb(255,122,26)]');
-        } else {
-            ui.historyStatus.classList.add('text-[color:var(--ink-dim)]');
-        }
-    };
-
     const buildParameters = () => {
         if (state.algo === 'pso') {
             return {
@@ -360,6 +346,8 @@ export function initSimulator({ root, isSim, isCompare }) {
         algo: state.algo,
         objective: ui.objective ? ui.objective.value : state.objective,
         convergence: ui.convergence ? ui.convergence.value : null,
+        mode: 'normal',
+        batch_id: null,
         bounds: Number(ui.bounds ? ui.bounds.value : state.bounds),
         population: Number(ui.pop ? ui.pop.value : state.particles.length),
         iterations: Number(ui.iterations ? ui.iterations.value : state.iter),
@@ -384,7 +372,6 @@ export function initSimulator({ root, isSim, isCompare }) {
             return;
         }
         try {
-            setHistoryStatus('Guardando historial...', 'muted');
             const response = await fetch(historyUrl, {
                 method: 'POST',
                 headers: {
@@ -398,9 +385,8 @@ export function initSimulator({ root, isSim, isCompare }) {
                 throw new Error('save_failed');
             }
             lastSavedRunId = state.runId;
-            setHistoryStatus('Simulacion guardada en historial.', 'success');
         } catch (error) {
-            setHistoryStatus('No se pudo guardar el historial.', 'warning');
+            // no-op
         }
     };
 

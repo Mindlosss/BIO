@@ -18,6 +18,8 @@ class SimulationHistory extends Model
         'algo',
         'objective',
         'convergence',
+        'mode',
+        'batch_id',
         'bounds',
         'population',
         'iterations',
