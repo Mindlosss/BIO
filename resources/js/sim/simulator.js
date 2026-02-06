@@ -1,7 +1,7 @@
 import { objectiveFns } from './objectives';
 import { modePresets } from './modePresets';
-import { clamp, randRange } from './utils';
-import { draw2DState, draw3DState, drawChartWithValues, resizeCanvas } from './render';
+import { clamp, createSeededRng, normalizeSeed, randRange } from './utils';
+import { draw2DState, draw3DState, drawChartWithValues, drawSparkline, resizeCanvas } from './render';
 import { createComparisonManager } from './comparison';
 
 export function initSimulator({ root, isSim, isCompare }) {
@@ -24,17 +24,29 @@ export function initSimulator({ root, isSim, isCompare }) {
         iterations: document.getElementById('iterations'),
         speed: document.getElementById('speed'),
         speedValue: document.getElementById('speedValue'),
+        seed: document.getElementById('seed'),
+        seedRepeat: document.getElementById('seedRepeat'),
+        seedRandom: document.getElementById('seedRandom'),
+        trailToggle: document.getElementById('trailToggle'),
         toggle: document.getElementById('toggle'),
+        step: document.getElementById('step'),
         reset: document.getElementById('reset'),
         benchmark: document.getElementById('benchmark'),
         iter: document.getElementById('iter'),
         bestF: document.getElementById('bestF'),
         bestXY: document.getElementById('bestXY'),
+        avgF: document.getElementById('avgF'),
+        diversity: document.getElementById('diversity'),
+        improveRate: document.getElementById('improveRate'),
+        exploreLabel: document.getElementById('exploreLabel'),
+        exploreBar: document.getElementById('exploreBar'),
         algoTag: document.getElementById('algoTag'),
         algoDesc: document.getElementById('algoDesc'),
         domainTag: document.getElementById('domainTag'),
         chartLegend: document.getElementById('chartLegend'),
         comparisonGrid: document.getElementById('comparisonGrid'),
+        miniDiversity: document.getElementById('canvasDiversity'),
+        miniAverage: document.getElementById('canvasAvg'),
         psoW: document.getElementById('psoW'),
         psoC1: document.getElementById('psoC1'),
         psoC2: document.getElementById('psoC2'),
@@ -76,6 +88,8 @@ export function initSimulator({ root, isSim, isCompare }) {
     const ctx2d = canvases.view2d ? canvases.view2d.getContext('2d') : null;
     const ctx3d = canvases.view3d ? canvases.view3d.getContext('2d') : null;
     const ctxChart = canvases.chart ? canvases.chart.getContext('2d') : null;
+    const ctxMiniDiversity = ui.miniDiversity ? ui.miniDiversity.getContext('2d') : null;
+    const ctxMiniAverage = ui.miniAverage ? ui.miniAverage.getContext('2d') : null;
 
     const paramSections = Array.from(document.querySelectorAll('.param'));
 
@@ -101,6 +115,22 @@ export function initSimulator({ root, isSim, isCompare }) {
             desc: 'Hormigas virtuales refuerzan caminos con feromonas hacia mejores soluciones.'
         }
     };
+    const convergenceLabels = {
+        exploracion: {
+            label: 'Mas exploracion',
+            ratio: 0.8
+        },
+        equilibrado: {
+            label: 'Balanceado',
+            ratio: 0.5
+        },
+        optimo: {
+            label: 'Mas explotacion',
+            ratio: 0.2
+        }
+    };
+    const agentColor = '#2bd1a7';
+    const bestColor = 'rgba(255, 232, 181, 0.95)';
 
     const state = {
         bounds: Number(ui.bounds ? ui.bounds.value : 5),
@@ -108,11 +138,37 @@ export function initSimulator({ root, isSim, isCompare }) {
         best: null,
         iter: 0,
         history: [],
+        historyAvg: [],
+        historyDiversity: [],
         running: false,
         algo: ui.algo ? ui.algo.value : 'pso',
         objective: ui.objective ? ui.objective.value : 'sphere',
-        speed: Number(ui.speed ? ui.speed.value : 1)
+        speed: Number(ui.speed ? ui.speed.value : 1),
+        seed: ui.seed ? normalizeSeed(ui.seed.value || Date.now()) : normalizeSeed(Date.now()),
+        rng: null,
+        trails: [],
+        showTrails: ui.trailToggle ? ui.trailToggle.checked : true,
+        colorMode: 'fitness',
+        metrics: {
+            avgF: null,
+            diversity: null,
+            improve: null,
+            exploration: null,
+            speedAvg: null
+        },
     };
+
+    const setSeed = (seedValue) => {
+        state.seed = normalizeSeed(seedValue);
+        state.rng = createSeededRng(state.seed);
+        if (ui.seed) {
+            ui.seed.value = state.seed;
+        }
+    };
+
+    setSeed(state.seed);
+
+    const random = () => (state.rng ? state.rng() : Math.random());
 
     const comparison = createComparisonManager({
         ui,
@@ -140,7 +196,9 @@ export function initSimulator({ root, isSim, isCompare }) {
             bounds: ui.bounds ? ui.bounds.value : state.bounds,
             pop: ui.pop ? ui.pop.value : state.particles.length,
             speed: ui.speed ? ui.speed.value : state.speed,
-            iterations: ui.iterations ? ui.iterations.value : 100
+            iterations: ui.iterations ? ui.iterations.value : 100,
+            seed: state.seed,
+            trails: state.showTrails ? '1' : '0'
         });
 
         if (state.algo === 'pso') {
@@ -175,14 +233,14 @@ export function initSimulator({ root, isSim, isCompare }) {
     let stepBudget = 0;
 
     const createParticle = () => {
-        const x = randRange(-state.bounds, state.bounds);
-        const y = randRange(-state.bounds, state.bounds);
+        const x = randRange(-state.bounds, state.bounds, random);
+        const y = randRange(-state.bounds, state.bounds, random);
         const f = objectiveFns[state.objective](x, y);
         return {
             x,
             y,
-            vx: randRange(-1, 1),
-            vy: randRange(-1, 1),
+            vx: randRange(-1, 1, random),
+            vy: randRange(-1, 1, random),
             bestX: x,
             bestY: y,
             bestF: f,
@@ -190,16 +248,88 @@ export function initSimulator({ root, isSim, isCompare }) {
         };
     };
 
+    const maxTrailLength = 22;
+
+    const resetTrails = () => {
+        state.trails = state.particles.map((p) => [{ x: p.x, y: p.y }]);
+    };
+
+    const recordTrails = () => {
+        if (!state.trails || state.trails.length !== state.particles.length) {
+            resetTrails();
+        }
+        state.particles.forEach((p, index) => {
+            const trail = state.trails[index];
+            trail.push({ x: p.x, y: p.y });
+            if (trail.length > maxTrailLength) {
+                trail.shift();
+            }
+        });
+    };
+
+    const computeMetrics = () => {
+        const count = state.particles.length;
+        if (!count) {
+            return;
+        }
+        let sumF = 0;
+        let sumX = 0;
+        let sumY = 0;
+        let sumSpeed = 0;
+        state.particles.forEach((p) => {
+            sumF += p.f;
+            sumX += p.x;
+            sumY += p.y;
+            sumSpeed += Math.hypot(p.vx || 0, p.vy || 0);
+        });
+        const avgF = sumF / count;
+        const centerX = sumX / count;
+        const centerY = sumY / count;
+        let sumDist = 0;
+        state.particles.forEach((p) => {
+            sumDist += Math.hypot(p.x - centerX, p.y - centerY);
+        });
+        const diversity = sumDist / count;
+
+        let improve = null;
+        if (state.history.length > 1) {
+            const slice = state.history.slice(-6);
+            const first = slice[0];
+            const last = slice[slice.length - 1];
+            improve = (first - last) / Math.max(Math.abs(first), 1e-6);
+        }
+
+        state.metrics = {
+            avgF,
+            diversity,
+            improve,
+            exploration: Math.min(1, diversity / (state.bounds * 1.1)),
+            speedAvg: sumSpeed / count
+        };
+        state.historyAvg.push(avgF);
+        state.historyDiversity.push(diversity);
+        if (state.historyAvg.length > 240) {
+            state.historyAvg.shift();
+        }
+        if (state.historyDiversity.length > 240) {
+            state.historyDiversity.shift();
+        }
+    };
+
     const resetSimulation = () => {
         state.bounds = Number(ui.bounds ? ui.bounds.value : state.bounds);
         stepBudget = 0;
+        setSeed(state.seed);
         const popValue = ui.pop ? Number(ui.pop.value) : state.particles.length || 24;
         state.particles = Array.from({ length: popValue }, createParticle);
         state.best = null;
         state.iter = 0;
         state.history = [];
+        state.historyAvg = [];
+        state.historyDiversity = [];
         comparison.stopComparison();
         updateBest();
+        resetTrails();
         drawAll();
     };
 
@@ -221,6 +351,7 @@ export function initSimulator({ root, isSim, isCompare }) {
         if (state.history.length > 240) {
             state.history.shift();
         }
+        computeMetrics();
     };
 
     const stepPSO = () => {
@@ -229,8 +360,8 @@ export function initSimulator({ root, isSim, isCompare }) {
         const c1 = Number(ui.psoC1.value);
         const c2 = Number(ui.psoC2.value);
         state.particles.forEach((p) => {
-            const r1 = Math.random();
-            const r2 = Math.random();
+            const r1 = random();
+            const r2 = random();
             const vx = w * p.vx + c1 * r1 * (p.bestX - p.x) + c2 * r2 * (state.best.x - p.x);
             const vy = w * p.vy + c1 * r1 * (p.bestY - p.y) + c2 * r2 * (state.best.y - p.y);
             p.vx = clamp(vx, -0.6, 0.6);
@@ -253,8 +384,8 @@ export function initSimulator({ root, isSim, isCompare }) {
                     const dy = pj.y - pi.y;
                     const distSq = dx * dx + dy * dy;
                     const beta = beta0 * Math.exp(-gamma * distSq);
-                    pi.x += beta * dx * 0.35 + alpha * (Math.random() - 0.5);
-                    pi.y += beta * dy * 0.35 + alpha * (Math.random() - 0.5);
+                    pi.x += beta * dx * 0.35 + alpha * (random() - 0.5);
+                    pi.y += beta * dy * 0.35 + alpha * (random() - 0.5);
                     pi.x = clamp(pi.x, -state.bounds, state.bounds);
                     pi.y = clamp(pi.y, -state.bounds, state.bounds);
                 }
@@ -273,18 +404,18 @@ export function initSimulator({ root, isSim, isCompare }) {
         const elites = scored.slice(0, eliteCount).map((item) => item.p);
         const next = [...elites];
         while (next.length < scored.length) {
-            const a = elites[Math.floor(Math.random() * elites.length)];
-            const b = elites[Math.floor(Math.random() * elites.length)];
+            const a = elites[Math.floor(random() * elites.length)];
+            const b = elites[Math.floor(random() * elites.length)];
             let x = a.x;
             let y = a.y;
-            if (Math.random() < crossover) {
-                const t = Math.random();
+            if (random() < crossover) {
+                const t = random();
                 x = a.x * t + b.x * (1 - t);
                 y = a.y * t + b.y * (1 - t);
             }
-            if (Math.random() < mutation) {
-                x += randRange(-0.18, 0.18);
-                y += randRange(-0.18, 0.18);
+            if (random() < mutation) {
+                x += randRange(-0.18, 0.18, random);
+                y += randRange(-0.18, 0.18, random);
             }
             x = clamp(x, -state.bounds, state.bounds);
             y = clamp(y, -state.bounds, state.bounds);
@@ -292,8 +423,8 @@ export function initSimulator({ root, isSim, isCompare }) {
             next.push({
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -301,19 +432,20 @@ export function initSimulator({ root, isSim, isCompare }) {
             });
         }
         state.particles = next;
+        resetTrails();
     };
 
     const stepCuckoo = () => {
         const pa = Number(ui.ckPa.value);
         const step = Number(ui.ckStep.value) * 0.35;
         state.particles.forEach((p) => {
-            if (Math.random() < pa) {
-                p.x = randRange(-state.bounds, state.bounds);
-                p.y = randRange(-state.bounds, state.bounds);
+            if (random() < pa) {
+                p.x = randRange(-state.bounds, state.bounds, random);
+                p.y = randRange(-state.bounds, state.bounds, random);
                 return;
             }
-            const levyX = (Math.random() - 0.5) * step * 2;
-            const levyY = (Math.random() - 0.5) * step * 2;
+            const levyX = (random() - 0.5) * step * 2;
+            const levyY = (random() - 0.5) * step * 2;
             p.x += levyX + 0.12 * (state.best.x - p.x);
             p.y += levyY + 0.12 * (state.best.y - p.y);
             p.x = clamp(p.x, -state.bounds, state.bounds);
@@ -326,15 +458,15 @@ export function initSimulator({ root, isSim, isCompare }) {
         const alpha = Number(ui.acoAlpha.value);
         const beta = Number(ui.acoBeta.value);
         const noise = 0.15;
+        const pheromone = Math.pow(1 - rho, alpha);
         state.particles.forEach((p) => {
             const dx = state.best.x - p.x;
             const dy = state.best.y - p.y;
             const dist = Math.sqrt(dx * dx + dy * dy) + 1e-6;
             const desirability = Math.pow(1 / dist, beta);
-            const pheromone = Math.pow(1 - rho, alpha);
             const step = 0.12 * pheromone * desirability;
-            p.x = clamp(p.x + dx * step + noise * (Math.random() - 0.5), -state.bounds, state.bounds);
-            p.y = clamp(p.y + dy * step + noise * (Math.random() - 0.5), -state.bounds, state.bounds);
+            p.x = clamp(p.x + dx * step + noise * (random() - 0.5), -state.bounds, state.bounds);
+            p.y = clamp(p.y + dy * step + noise * (random() - 0.5), -state.bounds, state.bounds);
         });
     };
 
@@ -362,20 +494,34 @@ export function initSimulator({ root, isSim, isCompare }) {
             stepACO();
         }
         updateBest();
+        recordTrails();
         state.iter += 1;
     };
 
     const draw2D = () => {
-        draw2DState(state, ctx2d, canvases.view2d);
+        draw2DState(state, ctx2d, canvases.view2d, agentColor, bestColor, {
+            showTrails: state.showTrails
+        });
     };
 
     const draw3D = () => {
         const surfaceMode = ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth';
-        draw3DState(state, ctx3d, canvases.view3d, objectiveFns, surfaceMode);
+        draw3DState(state, ctx3d, canvases.view3d, objectiveFns, surfaceMode, agentColor, bestColor, {
+            showTrails: state.showTrails
+        });
     };
 
     const drawChart = () => {
-        drawChartWithValues(ctxChart, canvases.chart, state.history, 'rgba(255, 122, 26, 0.85)');
+        drawChartWithValues(ctxChart, canvases.chart, state.history, agentColor);
+    };
+
+    const drawMiniCharts = () => {
+        if (ui.miniDiversity) {
+            drawSparkline(ctxMiniDiversity, ui.miniDiversity, state.historyDiversity, 'rgba(255, 122, 26, 0.85)');
+        }
+        if (ui.miniAverage) {
+            drawSparkline(ctxMiniAverage, ui.miniAverage, state.historyAvg, 'rgba(43, 209, 167, 0.9)');
+        }
     };
 
     const drawAll = () => {
@@ -385,6 +531,7 @@ export function initSimulator({ root, isSim, isCompare }) {
         draw2D();
         draw3D();
         drawChart();
+        drawMiniCharts();
         if (ui.iter) {
             ui.iter.textContent = state.iter;
         }
@@ -396,12 +543,28 @@ export function initSimulator({ root, isSim, isCompare }) {
                 ui.bestXY.textContent = `${state.best.x.toFixed(2)}, ${state.best.y.toFixed(2)}`;
             }
         }
+        if (ui.avgF && state.metrics.avgF !== null) {
+            ui.avgF.textContent = state.metrics.avgF.toFixed(4);
+        }
+        if (ui.diversity && state.metrics.diversity !== null) {
+            ui.diversity.textContent = state.metrics.diversity.toFixed(2);
+        }
+        if (ui.improveRate) {
+            const improve = state.metrics.improve;
+            ui.improveRate.textContent = improve === null ? '-' : `${(improve * 100).toFixed(2)}%`;
+        }
+        if (ui.exploreLabel && ui.exploreBar) {
+            const explore = state.metrics.exploration ?? 0;
+            ui.exploreLabel.textContent = explore > 0.6 ? 'Exploracion' : explore > 0.35 ? 'Balance' : 'Explotacion';
+            ui.exploreBar.style.width = `${Math.round(explore * 100)}%`;
+        }
     };
 
     const resizeAll = () => {
         Object.values(canvases)
             .filter(Boolean)
             .forEach(resizeCanvas);
+        [ui.miniDiversity, ui.miniAverage].filter(Boolean).forEach(resizeCanvas);
         drawAll();
         if (isCompare) {
             comparison.resizeComparisonCanvases();
@@ -476,8 +639,25 @@ export function initSimulator({ root, isSim, isCompare }) {
         if (ui.algoDesc) {
             ui.algoDesc.textContent = algoInfo[state.algo].desc;
         }
+        if (ui.chartLegend) {
+            ui.chartLegend.innerHTML = `
+                <span class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background:${agentColor}"></span>
+                    Agentes
+                </span>
+                <span class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background:${bestColor}"></span>
+                    Mejor agente
+                </span>
+            `;
+        }
         if (ui.domainTag) {
             ui.domainTag.textContent = `Dominio: [-${state.bounds}, ${state.bounds}]`;
+        }
+        if (ui.exploreLabel && ui.exploreBar && ui.convergence) {
+            const convergence = convergenceLabels[ui.convergence.value] || convergenceLabels.equilibrado;
+            ui.exploreLabel.textContent = convergence.label;
+            ui.exploreBar.style.width = `${Math.round(convergence.ratio * 100)}%`;
         }
         syncParamLabels();
         setActiveParam(state.algo);
@@ -627,6 +807,57 @@ export function initSimulator({ root, isSim, isCompare }) {
         });
     }
 
+    if (ui.seed) {
+        ui.seed.addEventListener('change', () => {
+            setSeed(ui.seed.value);
+            if (isSim) {
+                resetSimulation();
+            }
+        });
+    }
+
+    if (ui.seedRepeat) {
+        ui.seedRepeat.addEventListener('click', () => {
+            if (isSim) {
+                resetSimulation();
+            }
+        });
+    }
+
+    if (ui.seedRandom) {
+        ui.seedRandom.addEventListener('click', () => {
+            setSeed(Date.now());
+            if (isSim) {
+                resetSimulation();
+            }
+        });
+    }
+
+    if (ui.trailToggle) {
+        ui.trailToggle.addEventListener('change', () => {
+            state.showTrails = ui.trailToggle.checked;
+            drawAll();
+        });
+    }
+
+
+    if (ui.step) {
+        ui.step.addEventListener('click', () => {
+            if (!isSim) {
+                return;
+            }
+            state.running = false;
+            if (ui.toggle) {
+                ui.toggle.textContent = 'Start';
+            }
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            stepSimulation();
+            drawAll();
+        });
+    }
+
     if (ui.surfaceMode) {
         ui.surfaceMode.addEventListener('change', () => {
             if (isSim) {
@@ -682,4 +913,3 @@ export function initSimulator({ root, isSim, isCompare }) {
         comparison.stopComparisonLoop();
     }
 }
-

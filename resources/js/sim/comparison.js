@@ -17,12 +17,13 @@ export function createComparisonManager({
     let comparisonStepBudget = 0;
 
     const comparisonColors = () => ({
-        pso: '#ff7a1a',
+        pso: '#2bd1a7',
         firefly: '#2bd1a7',
-        ga: '#8dd3ff',
-        cuckoo: '#f3d06b',
-        aco: '#b38bff'
+        ga: '#2bd1a7',
+        cuckoo: '#2bd1a7',
+        aco: '#2bd1a7'
     });
+    const bestColor = 'rgba(255, 232, 181, 0.95)';
 
     const getPresetForMode = (mode) => modePresets[mode] || modePresets.equilibrado;
 
@@ -85,8 +86,9 @@ export function createComparisonManager({
         const colors = comparisonColors();
         const surfaceMode = ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth';
         comparisonStates.forEach((entry) => {
-            draw2DState(entry.state, entry.ctx.view2d, entry.canvases.view2d);
-            draw3DState(entry.state, entry.ctx.view3d, entry.canvases.view3d, objectiveFns, surfaceMode);
+            const algoColor = colors[entry.algo];
+            draw2DState(entry.state, entry.ctx.view2d, entry.canvases.view2d, algoColor, bestColor);
+            draw3DState(entry.state, entry.ctx.view3d, entry.canvases.view3d, objectiveFns, surfaceMode, algoColor, bestColor);
             drawBenchmarkChart(entry.ctx.chart, entry.canvases.chart, entry.state.history, colors[entry.algo]);
             if (entry.stats) {
                 entry.stats.iter.textContent = `Iter: ${entry.state.iter}`;
@@ -241,6 +243,25 @@ export function createComparisonManager({
             titleRow.appendChild(title);
             titleRow.appendChild(toggle);
 
+            const legend = document.createElement('div');
+            legend.className = 'flex flex-wrap items-center gap-3 text-[0.65rem] text-[color:var(--ink-dim)]';
+            const legendAgent = document.createElement('span');
+            legendAgent.className = 'flex items-center gap-2';
+            const legendAgentDot = document.createElement('span');
+            legendAgentDot.className = 'h-2.5 w-2.5 rounded-full';
+            legendAgentDot.style.backgroundColor = comparisonColors()[algo];
+            legendAgent.appendChild(legendAgentDot);
+            legendAgent.appendChild(document.createTextNode('Agentes'));
+            const legendBest = document.createElement('span');
+            legendBest.className = 'flex items-center gap-2';
+            const legendBestDot = document.createElement('span');
+            legendBestDot.className = 'h-2.5 w-2.5 rounded-full';
+            legendBestDot.style.backgroundColor = bestColor;
+            legendBest.appendChild(legendBestDot);
+            legendBest.appendChild(document.createTextNode('Mejor agente'));
+            legend.appendChild(legendAgent);
+            legend.appendChild(legendBest);
+
             const config = document.createElement('div');
             config.className =
                 'absolute right-3 top-10 hidden w-[min(240px,88%)] grid gap-2 rounded-xl border border-white/15 bg-[rgba(10,16,14,0.95)] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.45)]';
@@ -332,6 +353,7 @@ export function createComparisonManager({
             stats.appendChild(bestXY);
 
             card.appendChild(titleRow);
+            card.appendChild(legend);
             card.appendChild(config);
             card.appendChild(label2d);
             card.appendChild(canvas2d);

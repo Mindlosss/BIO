@@ -1,5 +1,5 @@
 import { objectiveFns } from '../sim/objectives';
-import { clamp, randRange } from '../sim/utils';
+import { clamp, createSeededRng, randRange } from '../sim/utils';
 
 export async function initThreeView() {
     const rootEl = document.getElementById('three-root');
@@ -12,8 +12,12 @@ export async function initThreeView() {
     const objective = params.get('objective') || 'sphere';
     const bounds = Number(params.get('bounds') || 5);
     const pop = Math.max(10, Number(params.get('pop') || 60));
-    const speed = Math.max(0.1, Number(params.get('speed') || 1));
+    const speed = Math.max(0.1, Number(params.get('speed') || 0.5));
     const iterations = Math.max(1, Number(params.get('iterations') || 100));
+    const seed = Number(params.get('seed') || Date.now());
+
+    const rng = createSeededRng(seed);
+    const random = () => rng();
 
     const algoParams = {
         pso: {
@@ -43,6 +47,7 @@ export async function initThreeView() {
     };
 
     const objectiveFn = objectiveFns[objective] || objectiveFns.sphere;
+    const agentColor = 0x2bd1a7;
 
     const [
         {
@@ -70,6 +75,8 @@ export async function initThreeView() {
 
     const scene = new Scene();
     scene.background = new Color(0x0f1413);
+    const baseColor = new Color(agentColor);
+    const bestTone = new Color(0xffd28a);
 
     const camera = new PerspectiveCamera(50, 1, 0.1, 2000);
     camera.position.set(bounds * 2, bounds * 1.4, bounds * 2);
@@ -132,10 +139,18 @@ export async function initThreeView() {
     scene.add(wireframe);
 
     const agentGeometry = new SphereGeometry(Math.max(0.08, bounds * 0.03), 16, 16);
-    const agentMaterial = new MeshStandardMaterial({ color: 0xff7a1a });
+    const agentMaterial = new MeshStandardMaterial({ vertexColors: true });
     const agents = new InstancedMesh(agentGeometry, agentMaterial, pop);
     const dummy = new Object3D();
+    const instanceColor = new Color();
     scene.add(agents);
+    const bestMaterial = new MeshStandardMaterial({
+        color: 0xffe8b5,
+        emissive: 0xffd28a,
+        emissiveIntensity: 0.4
+    });
+    const bestMesh = new Mesh(new SphereGeometry(Math.max(0.12, bounds * 0.045), 18, 18), bestMaterial);
+    scene.add(bestMesh);
 
     const state = {
         bounds,
@@ -145,14 +160,14 @@ export async function initThreeView() {
     };
 
     const createParticle = () => {
-        const x = randRange(-bounds, bounds);
-        const y = randRange(-bounds, bounds);
+        const x = randRange(-bounds, bounds, random);
+        const y = randRange(-bounds, bounds, random);
         const f = objectiveFn(x, y);
         return {
             x,
             y,
-            vx: randRange(-1, 1),
-            vy: randRange(-1, 1),
+            vx: randRange(-1, 1, random),
+            vy: randRange(-1, 1, random),
             bestX: x,
             bestY: y,
             bestF: f,
@@ -180,8 +195,8 @@ export async function initThreeView() {
         const moveScale = 0.15;
         const { w, c1, c2 } = algoParams.pso;
         state.particles.forEach((p) => {
-            const r1 = Math.random();
-            const r2 = Math.random();
+            const r1 = random();
+            const r2 = random();
             const vx = w * p.vx + c1 * r1 * (p.bestX - p.x) + c2 * r2 * (state.best.x - p.x);
             const vy = w * p.vy + c1 * r1 * (p.bestY - p.y) + c2 * r2 * (state.best.y - p.y);
             p.vx = clamp(vx, -0.6, 0.6);
@@ -202,8 +217,8 @@ export async function initThreeView() {
                     const dy = pj.y - pi.y;
                     const distSq = dx * dx + dy * dy;
                     const betaVal = beta * Math.exp(-gamma * distSq);
-                    pi.x += betaVal * dx * 0.35 + alpha * 0.35 * (Math.random() - 0.5);
-                    pi.y += betaVal * dy * 0.35 + alpha * 0.35 * (Math.random() - 0.5);
+                    pi.x += betaVal * dx * 0.35 + alpha * 0.35 * (random() - 0.5);
+                    pi.y += betaVal * dy * 0.35 + alpha * 0.35 * (random() - 0.5);
                     pi.x = clamp(pi.x, -bounds, bounds);
                     pi.y = clamp(pi.y, -bounds, bounds);
                 }
@@ -220,18 +235,18 @@ export async function initThreeView() {
         const elites = scored.slice(0, eliteCount).map((item) => item.p);
         const next = [...elites];
         while (next.length < scored.length) {
-            const a = elites[Math.floor(Math.random() * elites.length)];
-            const b = elites[Math.floor(Math.random() * elites.length)];
+            const a = elites[Math.floor(random() * elites.length)];
+            const b = elites[Math.floor(random() * elites.length)];
             let x = a.x;
             let y = a.y;
-            if (Math.random() < cross) {
-                const t = Math.random();
+            if (random() < cross) {
+                const t = random();
                 x = a.x * t + b.x * (1 - t);
                 y = a.y * t + b.y * (1 - t);
             }
-            if (Math.random() < mut) {
-                x += randRange(-0.18, 0.18);
-                y += randRange(-0.18, 0.18);
+            if (random() < mut) {
+                x += randRange(-0.18, 0.18, random);
+                y += randRange(-0.18, 0.18, random);
             }
             x = clamp(x, -bounds, bounds);
             y = clamp(y, -bounds, bounds);
@@ -239,8 +254,8 @@ export async function initThreeView() {
             next.push({
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -253,13 +268,13 @@ export async function initThreeView() {
     const stepCuckoo = () => {
         const { pa, step } = algoParams.cuckoo;
         state.particles.forEach((p) => {
-            if (Math.random() < pa) {
-                p.x = randRange(-bounds, bounds);
-                p.y = randRange(-bounds, bounds);
+            if (random() < pa) {
+                p.x = randRange(-bounds, bounds, random);
+                p.y = randRange(-bounds, bounds, random);
                 return;
             }
-            const levyX = (Math.random() - 0.5) * step * 0.7;
-            const levyY = (Math.random() - 0.5) * step * 0.7;
+            const levyX = (random() - 0.5) * step * 0.7;
+            const levyY = (random() - 0.5) * step * 0.7;
             p.x += levyX + 0.12 * (state.best.x - p.x);
             p.y += levyY + 0.12 * (state.best.y - p.y);
             p.x = clamp(p.x, -bounds, bounds);
@@ -277,8 +292,8 @@ export async function initThreeView() {
             const desirability = Math.pow(1 / dist, beta);
             const pheromone = Math.pow(1 - rho, alpha);
             const step = 0.12 * pheromone * desirability;
-            p.x = clamp(p.x + dx * step + noise * (Math.random() - 0.5), -bounds, bounds);
-            p.y = clamp(p.y + dy * step + noise * (Math.random() - 0.5), -bounds, bounds);
+            p.x = clamp(p.x + dx * step + noise * (random() - 0.5), -bounds, bounds);
+            p.y = clamp(p.y + dy * step + noise * (random() - 0.5), -bounds, bounds);
         });
     };
 
@@ -302,13 +317,31 @@ export async function initThreeView() {
     };
 
     const applyAgents = () => {
+        const values = state.particles.map((p) => p.f);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        const range = maxVal - minVal || 1;
         state.particles.forEach((p, index) => {
             const height = mapHeight(objectiveFn(p.x, p.y));
             dummy.position.set(p.x, height, p.y);
             dummy.updateMatrix();
             agents.setMatrixAt(index, dummy.matrix);
+            const value = p.f;
+            const t = (value - minVal) / range;
+            instanceColor.copy(bestTone).lerp(baseColor, t);
+            agents.setColorAt(index, instanceColor);
         });
         agents.instanceMatrix.needsUpdate = true;
+        if (agents.instanceColor) {
+            agents.instanceColor.needsUpdate = true;
+        }
+        if (state.best) {
+            const bestHeight = mapHeight(objectiveFn(state.best.x, state.best.y));
+            bestMesh.position.set(state.best.x, bestHeight, state.best.y);
+            bestMesh.visible = true;
+        } else {
+            bestMesh.visible = false;
+        }
     };
 
     const algoLabel = document.getElementById('algoLabel');
@@ -318,6 +351,20 @@ export async function initThreeView() {
 
     if (algoLabel) algoLabel.textContent = algo.toUpperCase();
     if (objectiveLabel) objectiveLabel.textContent = objective;
+    const legend = document.getElementById('legend');
+    if (legend) {
+        const colorHex = `#${agentColor.toString(16).padStart(6, '0')}`;
+        legend.innerHTML = `
+            <span class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full" style="background:${colorHex}"></span>
+                Agentes
+            </span>
+            <span class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full" style="background:rgba(255, 232, 181, 0.95)"></span>
+                Mejor agente
+            </span>
+        `;
+    }
 
     const resize = () => {
         const rect = rootEl.getBoundingClientRect();

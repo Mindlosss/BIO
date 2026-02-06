@@ -12,10 +12,10 @@
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
                     <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Modo Comparacion</div>
-                    <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
+                    {{-- <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
                         Compara algoritmos bioinspirados en la misma funcion objetivo con vistas 2D, 3D y grafica
                         de convergencia para cada algoritmo.
-                    </div>
+                    </div> --}}
                 </div>
                 <a class="rounded-full border border-[rgba(255,122,26,0.5)] bg-[rgba(255,122,26,0.18)] px-3 py-2 text-sm text-[color:var(--ink)]"
                     href="{{ route('home') }}">
@@ -96,9 +96,9 @@
                         <div class="grid gap-2">
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (camara lenta)</label>
                             <div class="grid grid-cols-[1fr_auto] items-center gap-3">
-                                <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1"
+                                <input id="speed" type="range" min="0.1" max="4" step="0.1" value="0.5"
                                     class="h-9 w-full accent-[rgb(43,209,167)]">
-                                <span id="speedValue" class="font-mono text-sm text-[rgb(43,209,167)]">1x</span>
+                                <span id="speedValue" class="font-mono text-sm text-[rgb(43,209,167)]">0.5x</span>
                             </div>
                         </div>
 
