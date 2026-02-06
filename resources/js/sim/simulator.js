@@ -379,7 +379,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         bounds: Number(ui.bounds ? ui.bounds.value : state.bounds),
         population: Number(ui.pop ? ui.pop.value : state.particles.length),
         iterations: Number(ui.iterations ? ui.iterations.value : state.iter),
-        speed: Number(ui.speed ? ui.speed.value : state.speed),
         seed: state.seed,
         show_trails: state.showTrails,
         surface_mode: ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth',
