@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SimulationHistoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -21,8 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/sim/3d', function () {
         return view('sim-3d');
     })->name('sim.3d');
-});
 
+    Route::get('/history', [SimulationHistoryController::class, 'index'])->name('history.index');
+    Route::post('/history', [SimulationHistoryController::class, 'store'])->name('history.store');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

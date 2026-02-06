@@ -31,6 +31,8 @@ export function initSimulator({ root, isSim, isCompare }) {
         toggle: document.getElementById('toggle'),
         step: document.getElementById('step'),
         reset: document.getElementById('reset'),
+        saveHistory: document.getElementById('saveHistory'),
+        historyStatus: document.getElementById('historyStatus'),
         benchmark: document.getElementById('benchmark'),
         iter: document.getElementById('iter'),
         bestF: document.getElementById('bestF'),
@@ -141,6 +143,7 @@ export function initSimulator({ root, isSim, isCompare }) {
         historyAvg: [],
         historyDiversity: [],
         running: false,
+        runId: 0,
         algo: ui.algo ? ui.algo.value : 'pso',
         objective: ui.objective ? ui.objective.value : 'sphere',
         speed: Number(ui.speed ? ui.speed.value : 1),
@@ -185,6 +188,9 @@ export function initSimulator({ root, isSim, isCompare }) {
     });
 
     const sim3dUrl = root && root.dataset ? root.dataset.sim3dUrl : null;
+    const historyUrl = root && root.dataset ? root.dataset.historyUrl : null;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null;
+    let lastSavedRunId = null;
     const open3dButtons = Array.from(document.querySelectorAll('[data-open-3d]'));
     const open3dWindow = () => {
         if (!sim3dUrl) {
@@ -316,9 +322,111 @@ export function initSimulator({ root, isSim, isCompare }) {
         }
     };
 
+    const setHistoryStatus = (message, tone = 'muted') => {
+        if (!ui.historyStatus) {
+            return;
+        }
+        ui.historyStatus.textContent = message;
+        ui.historyStatus.classList.remove('text-[rgb(43,209,167)]', 'text-[rgb(255,122,26)]', 'text-[color:var(--ink-dim)]');
+        if (tone === 'success') {
+            ui.historyStatus.classList.add('text-[rgb(43,209,167)]');
+        } else if (tone === 'warning') {
+            ui.historyStatus.classList.add('text-[rgb(255,122,26)]');
+        } else {
+            ui.historyStatus.classList.add('text-[color:var(--ink-dim)]');
+        }
+    };
+
+    const buildParameters = () => {
+        if (state.algo === 'pso') {
+            return {
+                w: Number(ui.psoW ? ui.psoW.value : 0.72),
+                c1: Number(ui.psoC1 ? ui.psoC1.value : 1.5),
+                c2: Number(ui.psoC2 ? ui.psoC2.value : 1.7),
+            };
+        }
+        if (state.algo === 'firefly') {
+            return {
+                beta: Number(ui.ffBeta ? ui.ffBeta.value : 1.0),
+                gamma: Number(ui.ffGamma ? ui.ffGamma.value : 0.35),
+                alpha: Number(ui.ffAlpha ? ui.ffAlpha.value : 0.25),
+            };
+        }
+        if (state.algo === 'ga') {
+            return {
+                elite: Number(ui.gaElite ? ui.gaElite.value : 0.25),
+                mutation: Number(ui.gaMut ? ui.gaMut.value : 0.25),
+                crossover: Number(ui.gaCross ? ui.gaCross.value : 0.6),
+            };
+        }
+        if (state.algo === 'cuckoo') {
+            return {
+                pa: Number(ui.ckPa ? ui.ckPa.value : 0.25),
+                step: Number(ui.ckStep ? ui.ckStep.value : 0.7),
+            };
+        }
+        return {
+            rho: Number(ui.acoRho ? ui.acoRho.value : 0.35),
+            alpha: Number(ui.acoAlpha ? ui.acoAlpha.value : 1.0),
+            beta: Number(ui.acoBeta ? ui.acoBeta.value : 2.0),
+        };
+    };
+
+    const buildHistoryPayload = () => ({
+        algo: state.algo,
+        objective: ui.objective ? ui.objective.value : state.objective,
+        convergence: ui.convergence ? ui.convergence.value : null,
+        bounds: Number(ui.bounds ? ui.bounds.value : state.bounds),
+        population: Number(ui.pop ? ui.pop.value : state.particles.length),
+        iterations: Number(ui.iterations ? ui.iterations.value : state.iter),
+        speed: Number(ui.speed ? ui.speed.value : state.speed),
+        seed: state.seed,
+        show_trails: state.showTrails,
+        surface_mode: ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth',
+        parameters: buildParameters(),
+        metrics: {
+            best: state.best ? { ...state.best } : null,
+            avg_f: state.metrics.avgF,
+            diversity: state.metrics.diversity,
+            improve: state.metrics.improve,
+            exploration: state.metrics.exploration,
+            speed_avg: state.metrics.speedAvg,
+        },
+        history: state.history,
+    });
+
+    const persistHistory = async ({ force = false } = {}) => {
+        if (!historyUrl || !csrfToken || !isSim) {
+            return;
+        }
+        if (!force && lastSavedRunId === state.runId) {
+            return;
+        }
+        try {
+            setHistoryStatus('Guardando historial...', 'muted');
+            const response = await fetch(historyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify(buildHistoryPayload()),
+            });
+            if (!response.ok) {
+                throw new Error('save_failed');
+            }
+            lastSavedRunId = state.runId;
+            setHistoryStatus('Simulacion guardada en historial.', 'success');
+        } catch (error) {
+            setHistoryStatus('No se pudo guardar el historial.', 'warning');
+        }
+    };
+
     const resetSimulation = () => {
         state.bounds = Number(ui.bounds ? ui.bounds.value : state.bounds);
         stepBudget = 0;
+        state.runId += 1;
         setSeed(state.seed);
         const popValue = ui.pop ? Number(ui.pop.value) : state.particles.length || 24;
         state.particles = Array.from({ length: popValue }, createParticle);
@@ -480,6 +588,7 @@ export function initSimulator({ root, isSim, isCompare }) {
             if (rafId) {
                 cancelAnimationFrame(rafId);
             }
+            persistHistory();
             return;
         }
         if (state.algo === 'pso') {
@@ -709,6 +818,12 @@ export function initSimulator({ root, isSim, isCompare }) {
             }
             comparison.stopComparisonLoop();
             comparison.buildComparisonStates();
+        });
+    }
+
+    if (ui.saveHistory) {
+        ui.saveHistory.addEventListener('click', () => {
+            persistHistory({ force: true });
         });
     }
 

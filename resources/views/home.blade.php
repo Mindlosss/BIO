@@ -3,10 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ config('app.name', 'Firefly') }}</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-page="bio-sim" data-sim3d-url="{{ route('sim.3d') }}" class="min-h-screen">
+    <body data-page="bio-sim" data-sim3d-url="{{ route('sim.3d') }}" data-history-url="{{ route('history.store') }}" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
@@ -18,10 +19,6 @@
                         los parametros para observar la busqueda en tiempo real.
                     </div> --}}
                 </div>
-                <a class="rounded-full border border-[rgba(255,122,26,0.5)] bg-[rgba(255,122,26,0.18)] px-3 py-2 text-sm text-[color:var(--ink)]"
-                    href="{{ route('comparison') }}">
-                    Modo comparacion
-                </a>
             </header>
 
             <div class="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -237,6 +234,13 @@
                                 class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5">
                                 Reset
                             </button>
+                        </div>
+                        <div class="grid gap-2">
+                            <button id="saveHistory"
+                                class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.12)] px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                Guardar en historial
+                            </button>
+                            <div id="historyStatus" class="text-xs text-[color:var(--ink-dim)]"></div>
                         </div>
                         <div id="stats" class="grid gap-1 rounded-[14px] bg-[rgba(12,18,16,0.6)] p-4 font-mono text-xs text-[color:var(--ink-dim)]">
                             <div>Iter: <strong id="iter" class="text-[rgb(43,209,167)]">0</strong></div>

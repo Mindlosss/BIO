@@ -17,10 +17,6 @@
                         de convergencia para cada algoritmo.
                     </div> --}}
                 </div>
-                <a class="rounded-full border border-[rgba(255,122,26,0.5)] bg-[rgba(255,122,26,0.18)] px-3 py-2 text-sm text-[color:var(--ink)]"
-                    href="{{ route('home') }}">
-                    Modo normal
-                </a>
             </header>
 
             <div class="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
