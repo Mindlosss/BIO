@@ -34,5 +34,6 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'nn_service_url' => env('NN_SERVICE_URL', 'http://127.0.0.1:8001'),
 
 ];

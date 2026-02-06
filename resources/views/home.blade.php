@@ -7,7 +7,7 @@
         <title>{{ config('app.name', 'Firefly') }}</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-page="bio-sim" data-sim3d-url="{{ route('sim.3d') }}" data-history-url="{{ route('history.store') }}" class="min-h-screen">
+    <body data-page="bio-sim" data-sim3d-url="{{ route('sim.3d') }}" data-history-url="{{ route('history.store') }}" data-nn-url="{{ route('nn.suggest') }}" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
@@ -246,6 +246,21 @@
                             <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>
                             <div id="algoDesc">
                                 Enjambre de particulas con memoria personal y global para converger al optimo.
+                            </div>
+                        </div>
+                        <div class="grid gap-3 rounded-[14px] border border-white/10 bg-[rgba(12,18,16,0.6)] p-4 text-sm text-[color:var(--ink-dim)]">
+                            <div class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Red neuronal</div>
+                            <div id="nnStatus">Entrena la red con tu historial de simulaciones.</div>
+                            <div id="nnSuggestion" class="text-[color:var(--ink)]"></div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="nnTrain" type="button"
+                                    class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                    Entrenar
+                                </button>
+                                <button id="nnApply" type="button" disabled
+                                    class="rounded-xl border border-white/10 bg-[rgba(25,38,33,0.6)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink-dim)]">
+                                    Aplicar
+                                </button>
                             </div>
                         </div>
                     </div>

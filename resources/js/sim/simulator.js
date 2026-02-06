@@ -3,6 +3,7 @@ import { modePresets } from './modePresets';
 import { clamp, createSeededRng, normalizeSeed, randRange } from './utils';
 import { draw2DState, draw3DState, drawChartWithValues, drawSparkline, resizeCanvas } from './render';
 import { createComparisonManager } from './comparison';
+import { createNeuralAdvisor } from './neural';
 
 export function initSimulator({ root, isSim, isCompare }) {
     if (!root) {
@@ -71,7 +72,11 @@ export function initSimulator({ root, isSim, isCompare }) {
         acoBeta: document.getElementById('acoBeta'),
         acoRhoValue: document.getElementById('acoRhoValue'),
         acoAlphaValue: document.getElementById('acoAlphaValue'),
-        acoBetaValue: document.getElementById('acoBetaValue')
+        acoBetaValue: document.getElementById('acoBetaValue'),
+        nnTrain: document.getElementById('nnTrain'),
+        nnStatus: document.getElementById('nnStatus'),
+        nnSuggestion: document.getElementById('nnSuggestion'),
+        nnApply: document.getElementById('nnApply')
     };
 
     const canvases = isSim
@@ -168,6 +173,7 @@ export function initSimulator({ root, isSim, isCompare }) {
 
     const sim3dUrl = root && root.dataset ? root.dataset.sim3dUrl : null;
     const historyUrl = root && root.dataset ? root.dataset.historyUrl : null;
+    const nnUrl = root && root.dataset ? root.dataset.nnUrl : null;
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null;
 
     const comparison = createComparisonManager({
@@ -184,6 +190,11 @@ export function initSimulator({ root, isSim, isCompare }) {
         clamp,
         randRange,
         algoInfo
+    });
+
+    createNeuralAdvisor({
+        nnUrl,
+        ui
     });
     let lastSavedRunId = null;
     const open3dButtons = Array.from(document.querySelectorAll('[data-open-3d]'));
@@ -963,7 +974,10 @@ export function initSimulator({ root, isSim, isCompare }) {
         ui.gaMut,
         ui.gaCross,
         ui.ckPa,
-        ui.ckStep
+        ui.ckStep,
+        ui.acoRho,
+        ui.acoAlpha,
+        ui.acoBeta
     ]
         .filter(Boolean)
         .forEach((input) => {
