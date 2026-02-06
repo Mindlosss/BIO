@@ -3,24 +3,21 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ config('app.name', 'Firefly') }} - Comparacion</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-page="bio-compare" class="min-h-screen">
+    <body data-page="bio-compare" data-history-url="{{ route('history.store') }}" class="min-h-screen">
         <div class="mx-auto grid w-[min(96vw,1680px)] max-w-[1680px] gap-6 px-5 pb-12 pt-7">
             @include('partials.auth-navbar')
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
-                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Modo Comparacion</div>
+                    <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Comparación</div>
                     {{-- <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
                         Compara algoritmos bioinspirados en la misma funcion objetivo con vistas 2D, 3D y grafica
                         de convergencia para cada algoritmo.
                     </div> --}}
                 </div>
-                <a class="rounded-full border border-[rgba(255,122,26,0.5)] bg-[rgba(255,122,26,0.18)] px-3 py-2 text-sm text-[color:var(--ink)]"
-                    href="{{ route('home') }}">
-                    Modo normal
-                </a>
             </header>
 
             <div class="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -101,6 +98,17 @@
                                 <span id="speedValue" class="font-mono text-sm text-[rgb(43,209,167)]">0.5x</span>
                             </div>
                         </div>
+                        <div class="grid gap-2">
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="seed">Semilla</label>
+                            <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2">
+                                <input id="seed" type="number" min="1" max="2147483647" value="1337"
+                                    class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-sm text-[color:var(--ink)]">
+                                <button id="seedRepeat" type="button"
+                                    class="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--ink-dim)]">Repetir</button>
+                                <button id="seedRandom" type="button"
+                                    class="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--ink-dim)]">Nueva</button>
+                            </div>
+                        </div>
 
                         <div class="grid gap-2">
                             <button id="benchmark"
@@ -111,11 +119,6 @@
                                 class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5">
                                 Reset
                             </button>
-                        </div>
-                        <div id="stats" class="grid gap-1 rounded-[14px] bg-[rgba(12,18,16,0.6)] p-4 font-mono text-xs text-[color:var(--ink-dim)]">
-                            <div>Iter: <strong id="iter" class="text-[rgb(43,209,167)]">0</strong></div>
-                            <div>Best f: <strong id="bestF" class="text-[rgb(43,209,167)]">-</strong></div>
-                            <div>Best x,y: <strong id="bestXY" class="text-[rgb(43,209,167)]">-</strong></div>
                         </div>
                         <div class="grid gap-2 text-[0.92rem] text-[color:var(--ink-dim)]">
                             <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>

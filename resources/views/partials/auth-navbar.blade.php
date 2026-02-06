@@ -3,7 +3,23 @@
         <a href="{{ route('home') }}" class="font-mono text-s uppercase tracking-[0.35em] text-[rgb(43,209,167)]">
             Firefly
         </a>
-        <div class="hidden items-center gap-3 text-xs text-[color:var(--ink-dim)] sm:flex">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-[color:var(--ink-dim)]">
+            <a href="{{ route('home') }}"
+                class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('home') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">
+                Modo normal
+            </a>
+            <a href="{{ route('comparison') }}"
+                class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('comparison') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">
+                Modo comparacion
+            </a>
+            <a href="{{ route('history.index') }}"
+                class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('history.*') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">
+                Historial
+            </a>
+            <a href="{{ route('neural.index') }}"
+                class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('neural.*') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">
+                Red neuronal
+            </a>
         </div>
     </div>
 

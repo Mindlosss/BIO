@@ -1,6 +1,10 @@
+import { createSeededRng } from './utils';
+
 export function createComparisonManager({
     ui,
     state,
+    historyUrl,
+    csrfToken,
     objectiveFns,
     modePresets,
     draw2DState,
@@ -15,6 +19,9 @@ export function createComparisonManager({
     let comparisonRunning = false;
     let comparisonRafId;
     let comparisonStepBudget = 0;
+    let comparisonRunId = 0;
+    let comparisonBatchId = null;
+    let lastSavedRunId = null;
 
     const comparisonColors = () => ({
         pso: '#2bd1a7',
@@ -37,16 +44,17 @@ export function createComparisonManager({
         return selected;
     };
 
-    const createBasePopulation = (count) =>
+    const createBasePopulation = (count, rng) =>
         Array.from({ length: count }, () => {
-            const x = randRange(-state.bounds, state.bounds);
-            const y = randRange(-state.bounds, state.bounds);
+            const random = rng || Math.random;
+            const x = randRange(-state.bounds, state.bounds, random);
+            const y = randRange(-state.bounds, state.bounds, random);
             const f = objectiveFns[state.objective](x, y);
             return {
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -69,6 +77,84 @@ export function createComparisonManager({
             }
         });
         localState.history.push(localState.best.f);
+    };
+
+    const computeLocalMetrics = (localState) => {
+        const count = localState.particles.length;
+        if (!count) {
+            return;
+        }
+        let sumF = 0;
+        let sumX = 0;
+        let sumY = 0;
+        let sumSpeed = 0;
+        localState.particles.forEach((p) => {
+            sumF += p.f;
+            sumX += p.x;
+            sumY += p.y;
+            sumSpeed += Math.hypot(p.vx || 0, p.vy || 0);
+        });
+        const avgF = sumF / count;
+        const centerX = sumX / count;
+        const centerY = sumY / count;
+        let sumDist = 0;
+        localState.particles.forEach((p) => {
+            sumDist += Math.hypot(p.x - centerX, p.y - centerY);
+        });
+        localState.metrics = {
+            avgF,
+            diversity: sumDist / count,
+            speedAvg: sumSpeed / count
+        };
+    };
+
+    const buildHistoryPayload = (entry, iterations) => ({
+        algo: entry.algo,
+        objective: state.objective,
+        convergence: ui.convergence ? ui.convergence.value : null,
+        mode: 'comparison',
+        batch_id: comparisonBatchId,
+        bounds: state.bounds,
+        population: entry.state.particles.length,
+        iterations,
+        seed: state.seed,
+        show_trails: false,
+        surface_mode: ui.surfaceMode && ui.surfaceMode.checked ? 'popular' : 'smooth',
+        parameters: entry.params,
+        metrics: {
+            best: entry.state.best ? { ...entry.state.best } : null,
+            avg_f: entry.state.metrics?.avgF ?? null,
+            diversity: entry.state.metrics?.diversity ?? null,
+            speed_avg: entry.state.metrics?.speedAvg ?? null,
+        },
+        history: entry.state.history,
+    });
+
+    const persistComparisonHistory = async (iterations) => {
+        if (!historyUrl || !csrfToken || !comparisonStates) {
+            return;
+        }
+        if (lastSavedRunId === comparisonRunId) {
+            return;
+        }
+        try {
+            await Promise.all(
+                comparisonStates.map((entry) =>
+                    fetch(historyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify(buildHistoryPayload(entry, iterations)),
+                    })
+                )
+            );
+            lastSavedRunId = comparisonRunId;
+        } catch (error) {
+            // no-op
+        }
     };
 
     const drawBenchmarkChart = (ctx, canvas, history, color) => {
@@ -96,6 +182,10 @@ export function createComparisonManager({
                     entry.stats.bestF.textContent = `Best f: ${entry.state.best.f.toFixed(4)}`;
                     entry.stats.bestXY.textContent = `Best x,y: ${entry.state.best.x.toFixed(2)}, ${entry.state.best.y.toFixed(2)}`;
                 }
+                if (entry.state.metrics) {
+                    entry.stats.avgF.textContent = `Prom f: ${entry.state.metrics.avgF.toFixed(4)}`;
+                    entry.stats.diversity.textContent = `Diversidad: ${entry.state.metrics.diversity.toFixed(2)}`;
+                }
             }
         });
     };
@@ -117,9 +207,10 @@ export function createComparisonManager({
 
     const stepPSOState = (localState, params) => {
         const moveScale = 0.15;
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
-            const r1 = Math.random();
-            const r2 = Math.random();
+            const r1 = random();
+            const r2 = random();
             const vx =
                 params.w * p.vx + params.c1 * r1 * (p.bestX - p.x) + params.c2 * r2 * (localState.best.x - p.x);
             const vy =
@@ -132,6 +223,7 @@ export function createComparisonManager({
     };
 
     const stepFireflyState = (localState, params) => {
+        const random = localState.random || Math.random;
         for (let i = 0; i < localState.particles.length; i += 1) {
             for (let j = 0; j < localState.particles.length; j += 1) {
                 const pi = localState.particles[i];
@@ -141,8 +233,8 @@ export function createComparisonManager({
                     const dy = pj.y - pi.y;
                     const distSq = dx * dx + dy * dy;
                     const beta = params.beta * Math.exp(-params.gamma * distSq);
-                    pi.x += beta * dx * 0.35 + params.alpha * 0.35 * (Math.random() - 0.5);
-                    pi.y += beta * dy * 0.35 + params.alpha * 0.35 * (Math.random() - 0.5);
+                    pi.x += beta * dx * 0.35 + params.alpha * 0.35 * (random() - 0.5);
+                    pi.y += beta * dy * 0.35 + params.alpha * 0.35 * (random() - 0.5);
                     pi.x = clamp(pi.x, -localState.bounds, localState.bounds);
                     pi.y = clamp(pi.y, -localState.bounds, localState.bounds);
                 }
@@ -151,6 +243,7 @@ export function createComparisonManager({
     };
 
     const stepGAState = (localState, params) => {
+        const random = localState.random || Math.random;
         const scored = localState.particles
             .map((p) => ({ p, f: objectiveFns[localState.objective](p.x, p.y) }))
             .sort((a, b) => a.f - b.f);
@@ -158,18 +251,18 @@ export function createComparisonManager({
         const elites = scored.slice(0, eliteCount).map((item) => item.p);
         const next = [...elites];
         while (next.length < scored.length) {
-            const a = elites[Math.floor(Math.random() * elites.length)];
-            const b = elites[Math.floor(Math.random() * elites.length)];
+            const a = elites[Math.floor(random() * elites.length)];
+            const b = elites[Math.floor(random() * elites.length)];
             let x = a.x;
             let y = a.y;
-            if (Math.random() < params.cross) {
-                const t = Math.random();
+            if (random() < params.cross) {
+                const t = random();
                 x = a.x * t + b.x * (1 - t);
                 y = a.y * t + b.y * (1 - t);
             }
-            if (Math.random() < params.mut) {
-                x += randRange(-0.18, 0.18);
-                y += randRange(-0.18, 0.18);
+            if (random() < params.mut) {
+                x += randRange(-0.18, 0.18, random);
+                y += randRange(-0.18, 0.18, random);
             }
             x = clamp(x, -localState.bounds, localState.bounds);
             y = clamp(y, -localState.bounds, localState.bounds);
@@ -177,8 +270,8 @@ export function createComparisonManager({
             next.push({
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -189,14 +282,15 @@ export function createComparisonManager({
     };
 
     const stepCuckooState = (localState, params) => {
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
-            if (Math.random() < params.pa) {
-                p.x = randRange(-localState.bounds, localState.bounds);
-                p.y = randRange(-localState.bounds, localState.bounds);
+            if (random() < params.pa) {
+                p.x = randRange(-localState.bounds, localState.bounds, random);
+                p.y = randRange(-localState.bounds, localState.bounds, random);
                 return;
             }
-            const levyX = (Math.random() - 0.5) * params.step * 0.7;
-            const levyY = (Math.random() - 0.5) * params.step * 0.7;
+            const levyX = (random() - 0.5) * params.step * 0.7;
+            const levyY = (random() - 0.5) * params.step * 0.7;
             p.x += levyX + 0.12 * (localState.best.x - p.x);
             p.y += levyY + 0.12 * (localState.best.y - p.y);
             p.x = clamp(p.x, -localState.bounds, localState.bounds);
@@ -207,6 +301,7 @@ export function createComparisonManager({
     const stepACOState = (localState, params) => {
         const { rho, alpha, beta } = params;
         const noise = 0.15;
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
             const dx = localState.best.x - p.x;
             const dy = localState.best.y - p.y;
@@ -214,8 +309,8 @@ export function createComparisonManager({
             const desirability = Math.pow(1 / dist, beta);
             const pheromone = Math.pow(1 - rho, alpha);
             const step = 0.12 * pheromone * desirability;
-            p.x = clamp(p.x + dx * step + noise * (Math.random() - 0.5), -localState.bounds, localState.bounds);
-            p.y = clamp(p.y + dy * step + noise * (Math.random() - 0.5), -localState.bounds, localState.bounds);
+            p.x = clamp(p.x + dx * step + noise * (random() - 0.5), -localState.bounds, localState.bounds);
+            p.y = clamp(p.y + dy * step + noise * (random() - 0.5), -localState.bounds, localState.bounds);
         });
     };
 
@@ -348,9 +443,15 @@ export function createComparisonManager({
             bestF.textContent = 'Best f: -';
             const bestXY = document.createElement('div');
             bestXY.textContent = 'Best x,y: -';
+            const avgF = document.createElement('div');
+            avgF.textContent = 'Prom f: -';
+            const diversity = document.createElement('div');
+            diversity.textContent = 'Diversidad: -';
             stats.appendChild(iter);
             stats.appendChild(bestF);
             stats.appendChild(bestXY);
+            stats.appendChild(avgF);
+            stats.appendChild(diversity);
 
             card.appendChild(titleRow);
             card.appendChild(legend);
@@ -376,7 +477,9 @@ export function createComparisonManager({
                 stats: {
                     iter,
                     bestF,
-                    bestXY
+                    bestXY,
+                    avgF,
+                    diversity
                 }
             };
         });
@@ -479,11 +582,17 @@ export function createComparisonManager({
             }
             return;
         }
-        const base = createBasePopulation(Number(ui.pop.value));
+        comparisonRunId += 1;
+        const timePart = (Date.now() % 1_000_000).toString(36).padStart(4, '0');
+        const runPart = comparisonRunId.toString(36);
+        comparisonBatchId = `c${timePart}${runPart}`;
+        const baseRng = createSeededRng(state.seed);
+        const base = createBasePopulation(Number(ui.pop.value), baseRng);
         const params = getAlgoParams();
         const cards = createComparisonCards(algos);
 
-        comparisonStates = cards.map((card) => {
+        comparisonStates = cards.map((card, index) => {
+            const rng = createSeededRng(state.seed + (index + 1) * 1000);
             const localState = {
                 algo: card.algo,
                 bounds: state.bounds,
@@ -491,9 +600,13 @@ export function createComparisonManager({
                 particles: cloneParticles(base),
                 best: null,
                 history: [],
-                iter: 0
+                iter: 0,
+                rng,
+                random: rng,
+                metrics: null
             };
             updateBestState(localState);
+            computeLocalMetrics(localState);
             return {
                 algo: card.algo,
                 state: localState,
@@ -553,6 +666,7 @@ export function createComparisonManager({
                     stepACOState(entry.state, entry.params);
                 }
                 updateBestState(entry.state);
+                computeLocalMetrics(entry.state);
                 entry.state.iter += 1;
             });
         };
@@ -572,6 +686,7 @@ export function createComparisonManager({
             const finished = comparisonStates.every((entry) => entry.state.iter >= iterations);
             if (finished) {
                 comparisonRunning = false;
+                persistComparisonHistory(iterations);
                 return;
             }
             comparisonRafId = requestAnimationFrame(loopComparison);
