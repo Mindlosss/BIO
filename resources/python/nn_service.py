@@ -1,5 +1,9 @@
 import json
+import os
 import random
+import threading
+import time
+from collections import deque
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -79,21 +83,27 @@ def init_matrix(rows, cols):
     return [[(random.random() - 0.5) * 0.3 for _ in range(cols)] for _ in range(rows)]
 
 
-def train_network(samples, input_size, hidden_size, epochs, lr):
+def train_network(samples, input_size, hidden_size, epochs, lr, on_epoch=None):
     w1 = init_matrix(hidden_size, input_size)
     b1 = [0 for _ in range(hidden_size)]
     w2 = [(random.random() - 0.5) * 0.3 for _ in range(hidden_size)]
     b2 = 0.0
 
-    for _ in range(epochs):
+    for epoch in range(epochs):
+        loss = 0.0
+        last_x = None
+        last_y = None
         for sample in samples:
             x = sample["x"]
             y = sample["y"]
+            last_x = x
+            last_y = y
 
             z1 = add_vec(mat_vec(w1, x), b1)
             a1 = [relu(value) for value in z1]
             y_hat = dot(w2, a1) + b2
             error = y_hat - y
+            loss += error * error
             d_y = 2 * error
 
             d_w2 = [d_y * value for value in a1]
@@ -115,6 +125,19 @@ def train_network(samples, input_size, hidden_size, epochs, lr):
                 for row_index, row in enumerate(w1)
             ]
             b1 = sub_vec(b1, scale_vec(d_b1, lr))
+
+        if on_epoch and (epoch % 2 == 0 or epoch == epochs - 1):
+            on_epoch(
+                epoch + 1,
+                epochs,
+                loss / max(1, len(samples)),
+                w1,
+                b1,
+                w2,
+                b2,
+                last_x,
+                last_y,
+            )
 
     def predict(values):
         z1 = add_vec(mat_vec(w1, values), b1)
@@ -239,8 +262,14 @@ class NeuralServiceHandler(BaseHTTPRequestHandler):
 
 
 def run():
+    plot_enabled = os.environ.get("NN_PLOT") == "1"
+    plotter = None
+    if plot_enabled:
+        plotter = start_plotter()
     server = HTTPServer(("127.0.0.1", 8001), NeuralServiceHandler)
     print("Neural service running on http://127.0.0.1:8001")
+    if plotter:
+        print("Neural plotter enabled.")
     server.serve_forever()
 
 
@@ -355,7 +384,13 @@ def run_training(payload):
     log.append(f"[server] dimensiones de entrada: {input_size}")
     log.append("[server] entrenando red (1 capa oculta, 6 neuronas, 220 epocas)")
 
-    predict = train_network(samples, input_size, 6, 220, 0.05)
+    plotter = GLOBAL_PLOTTER
+
+    def on_epoch(epoch, total, loss, w1, b1, w2, b2, x_sample, y_sample):
+        if plotter:
+            plotter.add_point(epoch, total, loss, w1, b1, w2, b2, x_sample, y_sample)
+
+    predict = train_network(samples, input_size, 6, 220, 0.05, on_epoch=on_epoch)
 
     candidate = suggest(predict, normalize, current, config)
 
@@ -376,6 +411,147 @@ def run_training(payload):
             "[server] sugerencia generada.",
         ],
     }
+
+
+GLOBAL_PLOTTER = None
+
+
+class LivePlotter:
+    def __init__(self):
+        self.points = deque(maxlen=200)
+        self.activations = deque(maxlen=200)
+        self.snapshot = None
+        self.lock = threading.Lock()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def start(self):
+        self.thread.start()
+        return self
+
+    def add_point(self, epoch, total, loss, w1, b1, w2, b2, x_sample, y_sample):
+        with self.lock:
+            self.points.append((epoch, total, loss))
+            if x_sample is not None:
+                self.snapshot = (w1, b1, w2, b2, x_sample, y_sample)
+
+    def _run(self):
+        try:
+            import matplotlib.pyplot as plt
+        except Exception:
+            print("Matplotlib no disponible. Instala matplotlib para ver el grafico.")
+            return
+
+        plt.ion()
+        fig, axes = plt.subplots(2, 1, figsize=(9, 6.5), gridspec_kw={"height_ratios": [3.2, 1.2]})
+        ax = axes[0]
+        ax_loss = axes[1]
+        fig.canvas.manager.set_window_title("Neural Network Live")
+        fig.subplots_adjust(hspace=0.35)
+        ax.set_title("Activaciones y pesos (tiempo real)")
+        ax.set_axis_off()
+        ax_loss.set_title("Loss y activacion promedio")
+        ax_loss.set_xlabel("Epoca")
+        ax_loss.set_ylabel("Loss")
+        ax_loss.grid(True, alpha=0.2)
+        loss_line, = ax_loss.plot([], [], color="#2bd1a7", linewidth=2, label="loss")
+        act_line, = ax_loss.plot([], [], color="#ff7a1a", linewidth=1.5, label="activacion")
+        ax_loss.legend(loc="upper right", fontsize=8)
+        plt.show(block=False)
+
+        while True:
+            with self.lock:
+                snapshot = self.snapshot
+                points = list(self.points)
+            if snapshot:
+                ax.clear()
+                ax.set_axis_off()
+                ax.set_title("Activaciones y pesos (tiempo real)")
+                w1, b1, w2, b2, x_sample, y_sample = snapshot
+                input_size = len(x_sample)
+                hidden_size = len(b1)
+
+                display_inputs = min(8, input_size)
+                input_indices = list(range(display_inputs))
+                x_vals = [x_sample[i] for i in input_indices]
+
+                hidden_vals = []
+                for h in range(hidden_size):
+                    z = b1[h]
+                    for idx, in_i in enumerate(input_indices):
+                        z += w1[h][in_i] * x_vals[idx]
+                    hidden_vals.append(relu(z))
+
+                output_val = b2 + sum(w2[h] * hidden_vals[h] for h in range(hidden_size))
+                self.activations.append(sum(hidden_vals) / max(1, len(hidden_vals)))
+
+                layer_x = [0.1, 0.5, 0.9]
+                input_y = [0.15 + i * (0.7 / max(1, display_inputs - 1)) for i in range(display_inputs)]
+                hidden_y = [0.1 + i * (0.8 / max(1, hidden_size - 1)) for i in range(hidden_size)]
+                output_y = [0.5]
+
+                def node_color(value):
+                    intensity = min(1.0, abs(value))
+                    return (1.0, 0.48, 0.1, 0.2 + 0.8 * intensity)
+
+                def weight_color(weight):
+                    alpha = min(0.9, 0.2 + abs(weight))
+                    if weight >= 0:
+                        return (0.17, 0.82, 0.65, alpha)
+                    return (1.0, 0.35, 0.35, alpha)
+
+                for i, y in enumerate(input_y):
+                    for h, hy in enumerate(hidden_y):
+                        w = w1[h][input_indices[i]]
+                        ax.plot([layer_x[0], layer_x[1]], [y, hy], color=weight_color(w), linewidth=1)
+
+                for h, hy in enumerate(hidden_y):
+                    w = w2[h]
+                    ax.plot([layer_x[1], layer_x[2]], [hy, output_y[0]], color=weight_color(w), linewidth=1)
+
+                for i, y in enumerate(input_y):
+                    size = 90 + min(60, abs(x_vals[i]) * 60)
+                    ax.scatter(layer_x[0], y, s=size, color=node_color(x_vals[i]))
+                for h, y in enumerate(hidden_y):
+                    size = 110 + min(80, abs(hidden_vals[h]) * 80)
+                    ax.scatter(layer_x[1], y, s=size, color=node_color(hidden_vals[h]))
+                out_size = 140 + min(100, abs(output_val) * 40)
+                ax.scatter(layer_x[2], output_y[0], s=out_size, color=node_color(output_val))
+
+                if points:
+                    last = points[-1]
+                    ax.text(
+                        0.02,
+                        0.96,
+                        f"Epoca {last[0]}/{last[1]}  Loss {last[2]:.4f}",
+                        transform=ax.transAxes,
+                        fontsize=9,
+                        color="#c9c2b6",
+                    )
+
+                if points:
+                    xs = [p[0] for p in points]
+                    ys = [p[2] for p in points]
+                    loss_line.set_data(xs, ys)
+                    activations = list(self.activations)
+                    if activations:
+                        act_scaled = [val / max(activations) for val in activations]
+                        act_line.set_data(xs[-len(act_scaled):], act_scaled)
+                    ax_loss.set_xlim(max(0, min(xs) - 2), max(xs) + 2)
+                    y_min = min(ys)
+                    y_max = max(ys)
+                    pad = (y_max - y_min) * 0.15 if y_max != y_min else 0.1
+                    ax_loss.set_ylim(max(0, y_min - pad), y_max + pad)
+
+                fig.canvas.draw_idle()
+            plt.pause(0.05)
+
+
+def start_plotter():
+    global GLOBAL_PLOTTER
+    if GLOBAL_PLOTTER:
+        return GLOBAL_PLOTTER
+    GLOBAL_PLOTTER = LivePlotter().start()
+    return GLOBAL_PLOTTER
 
 
 if __name__ == "__main__":
