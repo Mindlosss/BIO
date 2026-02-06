@@ -97,6 +97,17 @@
                                 <span id="speedValue" class="font-mono text-sm text-[rgb(43,209,167)]">0.5x</span>
                             </div>
                         </div>
+                        <div class="grid gap-2">
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="seed">Semilla</label>
+                            <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2">
+                                <input id="seed" type="number" min="1" max="2147483647" value="1337"
+                                    class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-sm text-[color:var(--ink)]">
+                                <button id="seedRepeat" type="button"
+                                    class="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--ink-dim)]">Repetir</button>
+                                <button id="seedRandom" type="button"
+                                    class="rounded-xl border border-white/10 px-3 py-2 text-xs text-[color:var(--ink-dim)]">Nueva</button>
+                            </div>
+                        </div>
 
                         <div class="grid gap-2">
                             <button id="benchmark"

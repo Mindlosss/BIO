@@ -235,13 +235,7 @@
                                 Reset
                             </button>
                         </div>
-                        <div class="grid gap-2">
-                            <button id="saveHistory"
-                                class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.12)] px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5">
-                                Guardar en historial
-                            </button>
-                            <div id="historyStatus" class="text-xs text-[color:var(--ink-dim)]"></div>
-                        </div>
+                        <div id="historyStatus" class="text-xs text-[color:var(--ink-dim)]"></div>
                         <div id="stats" class="grid gap-1 rounded-[14px] bg-[rgba(12,18,16,0.6)] p-4 font-mono text-xs text-[color:var(--ink-dim)]">
                             <div>Iter: <strong id="iter" class="text-[rgb(43,209,167)]">0</strong></div>
                             <div>Best f: <strong id="bestF" class="text-[rgb(43,209,167)]">-</strong></div>

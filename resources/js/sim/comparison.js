@@ -1,3 +1,5 @@
+import { createSeededRng } from './utils';
+
 export function createComparisonManager({
     ui,
     state,
@@ -37,16 +39,17 @@ export function createComparisonManager({
         return selected;
     };
 
-    const createBasePopulation = (count) =>
+    const createBasePopulation = (count, rng) =>
         Array.from({ length: count }, () => {
-            const x = randRange(-state.bounds, state.bounds);
-            const y = randRange(-state.bounds, state.bounds);
+            const random = rng || Math.random;
+            const x = randRange(-state.bounds, state.bounds, random);
+            const y = randRange(-state.bounds, state.bounds, random);
             const f = objectiveFns[state.objective](x, y);
             return {
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -117,9 +120,10 @@ export function createComparisonManager({
 
     const stepPSOState = (localState, params) => {
         const moveScale = 0.15;
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
-            const r1 = Math.random();
-            const r2 = Math.random();
+            const r1 = random();
+            const r2 = random();
             const vx =
                 params.w * p.vx + params.c1 * r1 * (p.bestX - p.x) + params.c2 * r2 * (localState.best.x - p.x);
             const vy =
@@ -132,6 +136,7 @@ export function createComparisonManager({
     };
 
     const stepFireflyState = (localState, params) => {
+        const random = localState.random || Math.random;
         for (let i = 0; i < localState.particles.length; i += 1) {
             for (let j = 0; j < localState.particles.length; j += 1) {
                 const pi = localState.particles[i];
@@ -141,8 +146,8 @@ export function createComparisonManager({
                     const dy = pj.y - pi.y;
                     const distSq = dx * dx + dy * dy;
                     const beta = params.beta * Math.exp(-params.gamma * distSq);
-                    pi.x += beta * dx * 0.35 + params.alpha * 0.35 * (Math.random() - 0.5);
-                    pi.y += beta * dy * 0.35 + params.alpha * 0.35 * (Math.random() - 0.5);
+                    pi.x += beta * dx * 0.35 + params.alpha * 0.35 * (random() - 0.5);
+                    pi.y += beta * dy * 0.35 + params.alpha * 0.35 * (random() - 0.5);
                     pi.x = clamp(pi.x, -localState.bounds, localState.bounds);
                     pi.y = clamp(pi.y, -localState.bounds, localState.bounds);
                 }
@@ -151,6 +156,7 @@ export function createComparisonManager({
     };
 
     const stepGAState = (localState, params) => {
+        const random = localState.random || Math.random;
         const scored = localState.particles
             .map((p) => ({ p, f: objectiveFns[localState.objective](p.x, p.y) }))
             .sort((a, b) => a.f - b.f);
@@ -158,18 +164,18 @@ export function createComparisonManager({
         const elites = scored.slice(0, eliteCount).map((item) => item.p);
         const next = [...elites];
         while (next.length < scored.length) {
-            const a = elites[Math.floor(Math.random() * elites.length)];
-            const b = elites[Math.floor(Math.random() * elites.length)];
+            const a = elites[Math.floor(random() * elites.length)];
+            const b = elites[Math.floor(random() * elites.length)];
             let x = a.x;
             let y = a.y;
-            if (Math.random() < params.cross) {
-                const t = Math.random();
+            if (random() < params.cross) {
+                const t = random();
                 x = a.x * t + b.x * (1 - t);
                 y = a.y * t + b.y * (1 - t);
             }
-            if (Math.random() < params.mut) {
-                x += randRange(-0.18, 0.18);
-                y += randRange(-0.18, 0.18);
+            if (random() < params.mut) {
+                x += randRange(-0.18, 0.18, random);
+                y += randRange(-0.18, 0.18, random);
             }
             x = clamp(x, -localState.bounds, localState.bounds);
             y = clamp(y, -localState.bounds, localState.bounds);
@@ -177,8 +183,8 @@ export function createComparisonManager({
             next.push({
                 x,
                 y,
-                vx: randRange(-1, 1),
-                vy: randRange(-1, 1),
+                vx: randRange(-1, 1, random),
+                vy: randRange(-1, 1, random),
                 bestX: x,
                 bestY: y,
                 bestF: f,
@@ -189,14 +195,15 @@ export function createComparisonManager({
     };
 
     const stepCuckooState = (localState, params) => {
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
-            if (Math.random() < params.pa) {
-                p.x = randRange(-localState.bounds, localState.bounds);
-                p.y = randRange(-localState.bounds, localState.bounds);
+            if (random() < params.pa) {
+                p.x = randRange(-localState.bounds, localState.bounds, random);
+                p.y = randRange(-localState.bounds, localState.bounds, random);
                 return;
             }
-            const levyX = (Math.random() - 0.5) * params.step * 0.7;
-            const levyY = (Math.random() - 0.5) * params.step * 0.7;
+            const levyX = (random() - 0.5) * params.step * 0.7;
+            const levyY = (random() - 0.5) * params.step * 0.7;
             p.x += levyX + 0.12 * (localState.best.x - p.x);
             p.y += levyY + 0.12 * (localState.best.y - p.y);
             p.x = clamp(p.x, -localState.bounds, localState.bounds);
@@ -207,6 +214,7 @@ export function createComparisonManager({
     const stepACOState = (localState, params) => {
         const { rho, alpha, beta } = params;
         const noise = 0.15;
+        const random = localState.random || Math.random;
         localState.particles.forEach((p) => {
             const dx = localState.best.x - p.x;
             const dy = localState.best.y - p.y;
@@ -214,8 +222,8 @@ export function createComparisonManager({
             const desirability = Math.pow(1 / dist, beta);
             const pheromone = Math.pow(1 - rho, alpha);
             const step = 0.12 * pheromone * desirability;
-            p.x = clamp(p.x + dx * step + noise * (Math.random() - 0.5), -localState.bounds, localState.bounds);
-            p.y = clamp(p.y + dy * step + noise * (Math.random() - 0.5), -localState.bounds, localState.bounds);
+            p.x = clamp(p.x + dx * step + noise * (random() - 0.5), -localState.bounds, localState.bounds);
+            p.y = clamp(p.y + dy * step + noise * (random() - 0.5), -localState.bounds, localState.bounds);
         });
     };
 
@@ -479,11 +487,13 @@ export function createComparisonManager({
             }
             return;
         }
-        const base = createBasePopulation(Number(ui.pop.value));
+        const baseRng = createSeededRng(state.seed);
+        const base = createBasePopulation(Number(ui.pop.value), baseRng);
         const params = getAlgoParams();
         const cards = createComparisonCards(algos);
 
-        comparisonStates = cards.map((card) => {
+        comparisonStates = cards.map((card, index) => {
+            const rng = createSeededRng(state.seed + (index + 1) * 1000);
             const localState = {
                 algo: card.algo,
                 bounds: state.bounds,
@@ -491,7 +501,9 @@ export function createComparisonManager({
                 particles: cloneParticles(base),
                 best: null,
                 history: [],
-                iter: 0
+                iter: 0,
+                rng,
+                random: rng
             };
             updateBestState(localState);
             return {

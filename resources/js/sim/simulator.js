@@ -31,7 +31,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         toggle: document.getElementById('toggle'),
         step: document.getElementById('step'),
         reset: document.getElementById('reset'),
-        saveHistory: document.getElementById('saveHistory'),
         historyStatus: document.getElementById('historyStatus'),
         benchmark: document.getElementById('benchmark'),
         iter: document.getElementById('iter'),
@@ -820,11 +819,6 @@ export function initSimulator({ root, isSim, isCompare }) {
         });
     }
 
-    if (ui.saveHistory) {
-        ui.saveHistory.addEventListener('click', () => {
-            persistHistory({ force: true });
-        });
-    }
 
     if (ui.benchmark) {
         ui.benchmark.addEventListener('click', () => {
@@ -926,6 +920,9 @@ export function initSimulator({ root, isSim, isCompare }) {
             setSeed(ui.seed.value);
             if (isSim) {
                 resetSimulation();
+            } else if (isCompare) {
+                comparison.stopComparisonLoop();
+                comparison.buildComparisonStates();
             }
         });
     }
@@ -934,6 +931,9 @@ export function initSimulator({ root, isSim, isCompare }) {
         ui.seedRepeat.addEventListener('click', () => {
             if (isSim) {
                 resetSimulation();
+            } else if (isCompare) {
+                comparison.stopComparisonLoop();
+                comparison.buildComparisonStates();
             }
         });
     }
@@ -943,6 +943,9 @@ export function initSimulator({ root, isSim, isCompare }) {
             setSeed(Date.now());
             if (isSim) {
                 resetSimulation();
+            } else if (isCompare) {
+                comparison.stopComparisonLoop();
+                comparison.buildComparisonStates();
             }
         });
     }
