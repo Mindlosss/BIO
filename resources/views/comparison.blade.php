@@ -158,7 +158,7 @@
 
                         <div class="grid gap-2">
                             <button id="benchmark"
-                                class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                class="rounded-xl border border-[rgba(255,122,26,0.6)] bg-[rgba(255,122,26,0.15)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[rgba(255,122,26,0.25)] hover:-translate-y-0.5 active:scale-95">
                                 Iniciar
                             </button>
                             <button id="reset"
@@ -177,12 +177,23 @@
                 </aside>
 
                 <section class="flex flex-col h-full rounded-[18px] border border-white/10 bg-[rgba(16,23,20,0.68)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[8px]">
-                <div class="flex items-center justify-between mb-4 px-2 text-[0.85rem] text-[color:var(--ink-dim)]">
-                    <span>Modo comparación</span>
-                    <span class="font-mono text-[10px] opacity-50 uppercase">2D, 3D y convergencia por algoritmo</span>
+                    <div class="flex items-center justify-between mb-4 px-2 text-[0.85rem] text-[color:var(--ink-dim)]">
+                        <span>Modo comparación</span>
+                        <span class="font-mono text-[10px] opacity-50 uppercase">2D, 3D y convergencia por algoritmo</span>
+                    </div>
+                    <div id="comparisonGrid" class="grid grid-cols-2 gap-4"></div>
+                </section>
+            </div>
+        </div>
+        <<div id="custom-alert" class="fixed top-10 left-1/2 z-[1000] -translate-x-1/2 opacity-0 pointer-events-none transition-all duration-500 ease-in-out">
+            <div class="flex items-center gap-4 rounded-2xl border border-[rgba(255,122,26,0.4)] bg-[rgba(17,25,22,0.98)] px-6 py-4 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,122,26,0.2)] text-[rgb(255,122,26)]">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
-                <div id="comparisonGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </section>
+                <div>
+                    <div class="text-base font-bold text-white">Límite de comparación</div>
+                    <div class="text-sm text-[color:var(--ink-dim)]">Selecciona máximo 4 algoritmos.</div>
+                </div>
             </div>
         </div>
 
@@ -208,12 +219,46 @@
                     document.querySelectorAll('.select-options').forEach(el => el.classList.remove('show'));
                 }
             }
+            // Función para limitar la selección a máximo 4 checkboxes
+            document.querySelectorAll('input[type="checkbox"][id^="compare"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedCount = document.querySelectorAll('input[type="checkbox"][id^="compare"]:checked').length;
+                
+                if (checkedCount > 4) {
+                    this.checked = false; 
+                    
+                    const alertBox = document.getElementById('custom-alert');
+                    alertBox.style.opacity = "1";
+                    alertBox.style.transform = "translate(-50%, 20px)"; 
+                    alertBox.style.pointerEvents = "auto";
+
+                    setTimeout(() => {
+                        alertBox.style.opacity = "0";
+                        alertBox.style.transform = "translate(-50%, 0px)"; 
+                        alertBox.style.pointerEvents = "none";
+                    }, 2500);
+                }
+            });
+        });
         </script>
     </body>
     <style>
             #surfaceMode:checked + div span {
                 transform: translateX(20px);
                 background-color: rgb(255, 122, 26) !important;
+            }
+
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+
+            .animate-slide-in {
+                animation: slideIn 0.3s ease forwards;
+            }
+
+            #custom-alert > div {
+                box-shadow: 0 0 20px rgba(255, 122, 26, 0.1);
             }
 
             #three-root {
@@ -226,7 +271,18 @@
                 border-radius: 12px;
             }
 
-            
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+            .flex:has(input:focus) {
+                border-color: rgba(255, 122, 26, 0.4);
+                box-shadow: 0 0 10px rgba(255, 122, 26, 0.05);
+            }
+
             #three-root canvas {
                 display: block;
                 width: 100% !important;
@@ -274,6 +330,25 @@
                 display: none;
                 overflow: hidden;
             }
+
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            input[type=number] {
+                -moz-appearance: textfield; 
+                appearance: textfield;
+            }
+
+            input[type="number"]:focus {
+                outline: none;
+                border-color: rgba(255, 122, 26, 0.5);
+                background: rgba(25, 38, 33, 1);
+                box-shadow: 0 0 15px rgba(255, 122, 26, 0.1);
+            }
+
             .select-options.show { display: block; animation: selectFade 0.2s ease; }
             .option-item { padding: 0.6rem 1rem; color: #94a3b8; cursor: pointer; transition: all 0.2s; }
             .option-item:hover { background: rgba(43, 209, 167, 0.15); color: #2bd1a7; }
