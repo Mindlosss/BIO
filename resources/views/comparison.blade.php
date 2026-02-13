@@ -119,20 +119,32 @@
 
                         <div class="grid gap-2">
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="bounds">Dominio (limite)</label>
-                            <input id="bounds" type="number" min="2" max="20" step="1" value="5"
-                                class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-sm text-[color:var(--ink)]">
+                            <div class="grid grid-cols-[auto_1fr_auto] gap-2">
+                                <button type="button" onclick="document.getElementById('bounds').stepDown()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
+                                <input id="bounds" type="number" min="2" max="20" step="1" value="5"
+                                    class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-center text-sm text-[color:var(--ink)]">
+                                <button type="button" onclick="document.getElementById('bounds').stepUp()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">+</button>
+                            </div>
                         </div>
 
                         <div class="grid gap-2">
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="pop">Poblacion</label>
-                            <input id="pop" type="number" min="10" max="300" value="60"
-                                class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-sm text-[color:var(--ink)]">
+                            <div class="grid grid-cols-[auto_1fr_auto] gap-2">
+                                <button type="button" onclick="document.getElementById('pop').stepDown()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
+                                <input id="pop" type="number" min="10" max="300" value="60"
+                                    class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-center text-sm text-[color:var(--ink)]">
+                                <button type="button" onclick="document.getElementById('pop').stepUp()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">+</button>
+                            </div>
                         </div>
 
                         <div class="grid gap-2">
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="iterations">Iteraciones</label>
-                            <input id="iterations" type="number" min="10" max="5000" step="10" value="100"
-                                class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-sm text-[color:var(--ink)]">
+                            <div class="grid grid-cols-[auto_1fr_auto] gap-2">
+                                <button type="button" onclick="document.getElementById('iterations').stepDown()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
+                                <input id="iterations" type="number" min="10" max="5000" step="10" value="100"
+                                    class="w-full rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] px-3 py-2 text-center text-sm text-[color:var(--ink)]">
+                                <button type="button" onclick="document.getElementById('iterations').stepUp()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">+</button>
+                            </div>
                         </div>
 
                         <div class="grid gap-2">
@@ -167,11 +179,7 @@
                             </button>
                         </div>
 
-                        <div class="grid gap-2 text-[0.92rem] text-[color:var(--ink-dim)]">
-                            <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>
-                            <div id="algoDesc">
-                                Enjambre de particulas con memoria personal y global para converger al optimo.
-                            </div>
+                        <div id="activeAlgosList" class="mt-2 flex flex-col gap-4 border-t border-white/10 pt-4 text-[0.92rem] text-[color:var(--ink-dim)]">
                         </div>
                     </div>
                 </aside>
@@ -185,7 +193,7 @@
                 </section>
             </div>
         </div>
-        <<div id="custom-alert" class="fixed top-10 left-1/2 z-[1000] -translate-x-1/2 opacity-0 pointer-events-none transition-all duration-500 ease-in-out">
+        <div id="custom-alert" class="fixed top-10 left-1/2 z-[1000] -translate-x-1/2 opacity-0 pointer-events-none transition-all duration-500 ease-in-out">
             <div class="flex items-center gap-4 rounded-2xl border border-[rgba(255,122,26,0.4)] bg-[rgba(17,25,22,0.98)] px-6 py-4 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-xl">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,122,26,0.2)] text-[rgb(255,122,26)]">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -240,6 +248,61 @@
                 }
             });
         });
+
+            // Diccionario de descripciones
+            const algoInfo = {
+                'comparePso': {
+                    name: 'PSO',
+                    desc: 'Enjambre con memoria personal y global para converger al optimo.'
+                },
+                'compareFirefly': {
+                    name: 'Firefly',
+                    desc: 'Atracción basada en brillo relativo y movimiento hacia parejas más brillantes.'
+                },
+                'compareGa': {
+                    name: 'Genetic',
+                    desc: 'Evolución basada en selección natural, cruce y mutación de genes.'
+                },
+                'compareCuckoo': {
+                    name: 'Cuckoo',
+                    desc: 'Búsqueda basada en parasitismo de nido y vuelos de Lévy aleatorios.'
+                },
+                'compareAco': {
+                    name: 'ACO',
+                    desc: 'Comportamiento de hormigas usando feromonas para optimizar rutas.'
+                }
+            };
+
+            function updateAlgoList() {
+                const container = document.getElementById('activeAlgosList');
+                container.innerHTML = ''; 
+                const checked = document.querySelectorAll('input[type="checkbox"][id^="compare"]:checked');
+
+                if (checked.length === 0) {
+                    container.innerHTML = '<div class="text-xs opacity-50 italic">Ningún algoritmo seleccionado.</div>';
+                    return;
+                }
+
+                checked.forEach(cb => {
+                    const info = algoInfo[cb.id];
+                    if (info) {
+                        const itemHtml = `
+                            <div class="animate-slide-in">
+                                <div class="font-mono text-xs text-[rgb(255,122,26)] mb-1 uppercase tracking-wider font-bold">${info.name}</div>
+                                <div class="leading-relaxed text-xs opacity-80">
+                                    ${info.desc}
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', itemHtml);
+                    }
+                });
+            }
+            document.querySelectorAll('input[type="checkbox"][id^="compare"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateAlgoList);
+            });
+
+            document.addEventListener('DOMContentLoaded', updateAlgoList);
         </script>
     </body>
     <style>
