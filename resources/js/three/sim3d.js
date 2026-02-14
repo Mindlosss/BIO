@@ -109,7 +109,7 @@ export async function initThreeView() {
         maxF = Math.max(maxF, f);
     }
     const rangeF = maxF - minF || 1;
-    const heightScale = bounds * 0.6;
+    const heightScale = bounds * 0.4;
     const mapHeight = (f) => {
         const t = (f - minF) / rangeF;
         return heightScale * (1 - t);
