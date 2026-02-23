@@ -133,6 +133,18 @@ export function initSimulator({ root, isSim, isCompare }) {
     };
     const agentColor = '#2bd1a7';
     const bestColor = 'rgba(255, 232, 181, 0.95)';
+    const speedLimits = {
+        min: 0.01,
+        max: 2.5
+    };
+    const normalizeSpeed = (value) => {
+        const numericValue = Number(value);
+        if (Number.isNaN(numericValue)) {
+            return speedLimits.min;
+        }
+        return clamp(numericValue, speedLimits.min, speedLimits.max);
+    };
+    const formatSpeed = (value) => `${normalizeSpeed(value).toFixed(2).replace(/\.?0+$/, '')}x`;
 
     const state = {
         bounds: Number(ui.bounds ? ui.bounds.value : 5),
@@ -146,7 +158,7 @@ export function initSimulator({ root, isSim, isCompare }) {
         runId: 0,
         algo: ui.algo ? ui.algo.value : 'pso',
         objective: ui.objective ? ui.objective.value : 'sphere',
-        speed: Number(ui.speed ? ui.speed.value : 1),
+        speed: normalizeSpeed(ui.speed ? ui.speed.value : 1),
         seed: ui.seed ? normalizeSeed(ui.seed.value || Date.now()) : normalizeSeed(Date.now()),
         rng: null,
         trails: [],
@@ -158,6 +170,13 @@ export function initSimulator({ root, isSim, isCompare }) {
             speedAvg: null
         },
     };
+
+    if (ui.speed) {
+        ui.speed.min = String(speedLimits.min);
+        ui.speed.max = String(speedLimits.max);
+        ui.speed.step = '0.01';
+        ui.speed.value = String(state.speed);
+    }
 
     const setSeed = (seedValue) => {
         state.seed = normalizeSeed(seedValue);
@@ -709,7 +728,10 @@ export function initSimulator({ root, isSim, isCompare }) {
 
     const updateUI = () => {
         if (ui.speedValue && ui.speed) {
-            ui.speedValue.textContent = `${Number(ui.speed.value)}x`;
+            const normalizedSpeed = normalizeSpeed(ui.speed.value);
+            ui.speed.value = String(normalizedSpeed);
+            state.speed = normalizedSpeed;
+            ui.speedValue.textContent = formatSpeed(normalizedSpeed);
         }
         if (ui.algoTag) {
             ui.algoTag.textContent = algoInfo[state.algo].tag;
@@ -876,7 +898,8 @@ export function initSimulator({ root, isSim, isCompare }) {
 
     if (ui.speed) {
         ui.speed.addEventListener('input', () => {
-            state.speed = Number(ui.speed.value);
+            state.speed = normalizeSpeed(ui.speed.value);
+            ui.speed.value = String(state.speed);
             updateUI();
         });
     }

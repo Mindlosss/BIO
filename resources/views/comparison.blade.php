@@ -150,7 +150,7 @@
                         <div class="grid gap-2">
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (camara lenta)</label>
                             <div class="grid grid-cols-[1fr_auto] items-center gap-3">
-                                <input id="speed" type="range" min="0.1" max="4" step="0.1" value="0.5"
+                                <input id="speed" type="range" min="0.01" max="2.5" step="0.01" value="0.5"
                                     class="h-9 w-full accent-[rgb(43,209,167)]">
                                 <span id="speedValue" class="font-mono text-sm text-[rgb(43,209,167)]">0.5x</span>
                             </div>
