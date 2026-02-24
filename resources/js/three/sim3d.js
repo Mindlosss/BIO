@@ -12,11 +12,12 @@ export async function initThreeView() {
     const objective = params.get('objective') || 'sphere';
     const bounds = Number(params.get('bounds') || 5);
     const pop = Math.max(10, Number(params.get('pop') || 60));
-    const speed = Math.max(0.1, Number(params.get('speed') || 0.5));
+    const speedParam = Number(params.get('speed'));
+    const speed = clamp(Number.isNaN(speedParam) ? 0.5 : speedParam, 0.01, 2.5);
     const iterations = Math.max(1, Number(params.get('iterations') || 100));
     const seed = Number(params.get('seed') || Date.now());
 
-    const rng = createSeededRng(seed);
+    let rng = createSeededRng(seed);
     const random = () => rng();
 
     const algoParams = {
@@ -74,7 +75,7 @@ export async function initThreeView() {
     ]);
 
     const scene = new Scene();
-    scene.background = new Color(0x0f1413);
+    scene.background = new Color(0x121816);
     const baseColor = new Color(agentColor);
     const bestTone = new Color(0xffd28a);
 
@@ -85,10 +86,28 @@ export async function initThreeView() {
     renderer.setPixelRatio(window.devicePixelRatio || 1);
     rootEl.appendChild(renderer.domElement);
 
+    // Configuración de controles orbitales
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.minDistance = bounds * 0.8;
-    controls.maxDistance = bounds * 6;
+    controls.dampingFactor = 0.05;
+   
+    controls.mouseButtons = {
+        LEFT: 0, 
+        MIDDLE: 2, 
+        RIGHT: 2  
+    };
+    controls.screenSpacePanning = true; 
+    
+    controls.zoomSpeed = 1.0; 
+    controls.panSpeed = 1.2; 
+    controls.rotateSpeed = 0.8;
+    controls.minDistance = Math.max(bounds * 0.1, 0.5);
+    controls.maxDistance = bounds * 12; 
+    controls.minPolarAngle = 0; 
+    controls.maxPolarAngle = Math.PI; 
+    controls.target.set(0, 0, 0);
+    controls.update();
+
 
     const ambient = new AmbientLight(0xffffff, 0.6);
     const directional = new DirectionalLight(0xffffff, 0.9);
@@ -175,9 +194,8 @@ export async function initThreeView() {
         };
     };
 
-    state.particles = Array.from({ length: pop }, createParticle);
-
     const updateBest = () => {
+        let currentBest = null;
         state.particles.forEach((p) => {
             p.f = objectiveFn(p.x, p.y);
             if (p.f < p.bestF) {
@@ -185,10 +203,11 @@ export async function initThreeView() {
                 p.bestX = p.x;
                 p.bestY = p.y;
             }
-            if (!state.best || p.f < state.best.f) {
-                state.best = { x: p.x, y: p.y, f: p.f };
+            if (!currentBest || p.f < currentBest.f) {
+                currentBest = { x: p.x, y: p.y, f: p.f };
             }
         });
+        state.best = currentBest;
     };
 
     const stepPSO = () => {
@@ -348,6 +367,7 @@ export async function initThreeView() {
     const objectiveLabel = document.getElementById('objectiveLabel');
     const iterLabel = document.getElementById('iterLabel');
     const bestLabel = document.getElementById('bestLabel');
+    const replayButton = document.getElementById('replay3d');
 
     if (algoLabel) algoLabel.textContent = algo.toUpperCase();
     if (objectiveLabel) objectiveLabel.textContent = objective;
@@ -374,6 +394,26 @@ export async function initThreeView() {
     };
 
     let stepBudget = 0;
+    const resetSimulation = () => {
+        rng = createSeededRng(seed);
+        state.particles = Array.from({ length: pop }, createParticle);
+        state.best = null;
+        state.iter = 0;
+        stepBudget = 0;
+        updateBest();
+        applyAgents();
+        if (iterLabel) {
+            iterLabel.textContent = String(state.iter);
+        }
+        if (bestLabel) {
+            bestLabel.textContent = state.best ? state.best.f.toFixed(4) : '-';
+        }
+    };
+
+    if (replayButton) {
+        replayButton.addEventListener('click', resetSimulation);
+    }
+
     const animate = () => {
         stepBudget += speed;
         const steps = Math.floor(stepBudget);
@@ -389,9 +429,8 @@ export async function initThreeView() {
         requestAnimationFrame(animate);
     };
 
-    updateBest();
+    resetSimulation();
     resize();
-    applyAgents();
     window.addEventListener('resize', resize);
     requestAnimationFrame(animate);
 }
