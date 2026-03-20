@@ -4,6 +4,7 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
     const applyButton = ui.nnApply;
     const trainButton = ui.nnTrain;
     const logKey = 'nn:lastLog';
+    const stateKey = 'nn:lastState';
 
     if (!nnUrl || !statusEl || !suggestionEl || !applyButton || !trainButton) {
         return;
@@ -26,6 +27,15 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
         }
         const value = Array.isArray(lines) ? lines.join('\n') : String(lines);
         localStorage.setItem(logKey, value);
+    };
+
+    const storeState = (payload) => {
+        if (!payload) {
+            localStorage.removeItem(stateKey);
+            return;
+        }
+
+        localStorage.setItem(stateKey, JSON.stringify(payload));
     };
 
     const applySuggestion = (candidate) => {
@@ -168,10 +178,20 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
     });
 
     const requestSuggestion = async () => {
+        const current = buildPayload();
+        const startedAt = new Date().toISOString();
+
         setStatus('Entrenando red neuronal en el servidor...');
         setSuggestion('');
         applyButton.disabled = true;
         storeLog(['[client] solicitando entrenamiento...']);
+        storeState({
+            checkedAt: startedAt,
+            current,
+            log: ['[client] solicitando entrenamiento...'],
+            message: 'Entrenando red neuronal en el servidor...',
+            status: 'pending',
+        });
 
         try {
             const response = await fetch(nnUrl, {
@@ -181,7 +201,7 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
                     Accept: 'application/json',
                     ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
                 },
-                body: JSON.stringify(buildPayload()),
+                body: JSON.stringify(current),
             });
 
             if (!response.ok) {
@@ -195,6 +215,13 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
                 setSuggestion('');
                 applyButton.disabled = true;
                 storeLog(payload.log || '[client] sin salida del servidor.');
+                storeState({
+                    checkedAt: new Date().toISOString(),
+                    current,
+                    log: payload.log || ['[client] sin salida del servidor.'],
+                    message: payload.message || 'No se pudo entrenar la red neuronal.',
+                    status: 'error',
+                });
                 return;
             }
 
@@ -205,6 +232,13 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
                 setSuggestion('');
                 applyButton.disabled = true;
                 storeLog(payload.log || '[client] sin salida del servidor.');
+                storeState({
+                    checkedAt: new Date().toISOString(),
+                    current,
+                    log: payload.log || ['[client] sin salida del servidor.'],
+                    message: 'No hay sugerencias disponibles.',
+                    status: 'error',
+                });
                 return;
             }
 
@@ -213,11 +247,26 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
             applyButton.disabled = false;
             applyButton.onclick = () => applySuggestion(candidate);
             storeLog(payload.log || '[client] entrenamiento completado.');
+            storeState({
+                candidate,
+                checkedAt: new Date().toISOString(),
+                current,
+                log: payload.log || ['[client] entrenamiento completado.'],
+                message: payload.data?.message || 'Red neuronal entrenada.',
+                status: 'ok',
+            });
         } catch (error) {
             setStatus('No se pudo entrenar la red neuronal.');
             setSuggestion('');
             applyButton.disabled = true;
             storeLog('[client] error de conexion.');
+            storeState({
+                checkedAt: new Date().toISOString(),
+                current,
+                log: ['[client] error de conexion.'],
+                message: 'No se pudo entrenar la red neuronal.',
+                status: 'error',
+            });
         }
     };
 
