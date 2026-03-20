@@ -51,9 +51,9 @@
                         class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
                         Revisar conexion
                     </button>
-                    <div class="text-xs text-[color:var(--ink-dim)]">
+                    {{-- <div class="text-xs text-[color:var(--ink-dim)]">
                         Ejecuta `python resources/python/nn_service.py` si esta desconectado.
-                    </div>
+                    </div> --}}
                 </div>
             </section>
 
