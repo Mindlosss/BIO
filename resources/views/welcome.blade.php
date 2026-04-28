@@ -23,15 +23,15 @@
                             Laboratorio de algoritmos bioinspirados
                         </h1>
                         <p class="mt-3 max-w-2xl text-lg leading-relaxed text-[color:var(--ink-dim)]">
-                            Visualiza PSO, Firefly, GA, Cuckoo y ACO con vistas 2D, 3D y grafica de convergencia.
-                            Ajusta parametros en tiempo real y compara estrategias en un solo panel.
+                            Visualiza PSO, Firefly, GA, Cuckoo y ACO con vistas 2D, 3D y gráfica de convergencia.
+                            Ajusta parámetros en tiempo real y compara estrategias en un solo panel.
                         </p>
                     </div>
 
                     <div class="flex flex-wrap gap-3">
                         <a href="{{ route('login') }}"
                             class="rounded-xl bg-[linear-gradient(135deg,#ff7a1a,#ffb36b)] px-5 py-3 text-sm font-semibold text-[#0e0f0f] shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5">
-                            Iniciar sesion
+                            Iniciar sesión
                         </a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}"
@@ -43,16 +43,16 @@
                 </div>
 
                 <div class="grid gap-4 rounded-[22px] border border-white/10 bg-[rgba(17,25,22,0.72)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[14px]">
-                    <div class="text-sm uppercase tracking-[0.3em] text-[color:var(--ink-dim)]">Que incluye</div>
+                    <div class="text-sm uppercase tracking-[0.3em] text-[color:var(--ink-dim)]">Qué incluye</div>
                     <div class="grid gap-3 text-sm text-[color:var(--ink-dim)]">
                         <div class="rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-4">
-                            Panel unico para configurar algoritmos y parametros criticos.
+                            Panel único para configurar algoritmos y parámetros críticos.
                         </div>
                         <div class="rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-4">
-                            Proyeccion isometrica + curvas de convergencia en tiempo real.
+                            Proyección isométrica + curvas de convergencia en tiempo real.
                         </div>
                         <div class="rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-4">
-                            Modo comparacion para ver rendimiento lado a lado.
+                            Modo comparación para ver rendimiento lado a lado.
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ config('app.name', 'Firefly') }} - Comparacion</title>
+        <title>{{ config('app.name', 'Firefly') }} - Comparación</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body data-page="bio-compare" data-history-url="{{ route('history.store') }}" class="min-h-screen">
@@ -21,7 +21,7 @@
                     <div class="grid gap-5">
                         
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Funcion objetivo</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Función objetivo</label>
                             <div class="custom-select-container">
                                 <input type="hidden" id="objective" value="sphere">
                                 <div class="select-trigger" onclick="toggleDrop('opts-obj')">
@@ -59,9 +59,9 @@
                                     <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                                 <div id="opts-conv" class="select-options">
-                                    <div class="option-item" onclick="setVal('convergence', 'exploracion', 'Exploracion')">Exploracion</div>
+                                    <div class="option-item" onclick="setVal('convergence', 'exploracion', 'Exploración')">Exploración</div>
                                     <div class="option-item" onclick="setVal('convergence', 'equilibrado', 'Equilibrado')">Equilibrado</div>
-                                    <div class="option-item" onclick="setVal('convergence', 'optimo', 'Optimo')">Optimo</div>
+                                    <div class="option-item" onclick="setVal('convergence', 'optimo', 'Óptimo')">Óptimo</div>
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="bounds">Dominio (limite)</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="bounds">Dominio (límite)</label>
                             <div class="grid grid-cols-[auto_1fr_auto] gap-2">
                                 <button type="button" onclick="document.getElementById('bounds').stepDown()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
                                 <input id="bounds" type="number" min="2" max="20" step="1" value="5"
@@ -128,7 +128,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="pop">Poblacion</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="pop">Población</label>
                             <div class="grid grid-cols-[auto_1fr_auto] gap-2">
                                 <button type="button" onclick="document.getElementById('pop').stepDown()" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
                                 <input id="pop" type="number" min="10" max="300" value="60"
@@ -148,7 +148,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (camara lenta)</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (cámara lenta)</label>
                             <div class="grid grid-cols-[1fr_auto] items-center gap-3">
                                 <input id="speed" type="range" min="0.01" max="2.5" step="0.01" value="0.5"
                                     class="h-9 w-full accent-[rgb(43,209,167)]">
@@ -253,7 +253,7 @@
             const algoInfo = {
                 'comparePso': {
                     name: 'PSO',
-                    desc: 'Enjambre con memoria personal y global para converger al optimo.'
+                    desc: 'Enjambre con memoria personal y global para converger al óptimo.'
                 },
                 'compareFirefly': {
                     name: 'Firefly',

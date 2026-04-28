@@ -98,19 +98,19 @@ export function initSimulator({ root, isSim, isCompare }) {
     const algoInfo = {
         pso: {
             tag: 'PSO',
-            desc: 'Enjambre con memoria personal y global para converger al optimo.'
+            desc: 'Enjambre con memoria personal y global para converger al óptimo.'
         },
         firefly: {
             tag: 'Firefly',
-            desc: 'Luciernagas se atraen segun la intensidad; las mejores guian.'
+            desc: 'Luciérnagas se atraen según la intensidad; las mejores guían.'
         },
         ga: {
             tag: 'Genetic',
-            desc: 'Seleccion, cruces y mutacion para refinar la poblacion.'
+            desc: 'Selección, cruces y mutación para refinar la población.'
         },
         cuckoo: {
             tag: 'Cuckoo',
-            desc: 'Busqueda con vuelos aleatorios y reemplazo probabilistico.'
+            desc: 'Búsqueda con vuelos aleatorios y reemplazo probabilístico.'
         },
         aco: {
             tag: 'ACO',
@@ -119,7 +119,7 @@ export function initSimulator({ root, isSim, isCompare }) {
     };
     const convergenceLabels = {
         exploracion: {
-            label: 'Mas exploracion',
+            label: 'Más exploración',
             ratio: 0.8
         },
         equilibrado: {
@@ -127,7 +127,7 @@ export function initSimulator({ root, isSim, isCompare }) {
             ratio: 0.5
         },
         optimo: {
-            label: 'Mas explotacion',
+            label: 'Más explotación',
             ratio: 0.2
         }
     };

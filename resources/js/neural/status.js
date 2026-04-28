@@ -16,8 +16,8 @@ const objectiveLabels = {
     styblinski: 'Styblinski-Tang',
 };
 
-const defaultConsoleHint = 'Aqui aparecen los eventos del ultimo entrenamiento ejecutado desde el simulador.';
-const defaultLastMessage = 'La proxima vez que entrenes desde el simulador, esta vista guardara el contexto y la sugerencia generada.';
+const defaultConsoleHint = 'Aquí aparecen los eventos del último entrenamiento ejecutado desde el simulador.';
+const defaultLastMessage = 'La próxima vez que entrenes desde el simulador, esta vista guardará el contexto y la sugerencia generada.';
 
 const setText = (element, value) => {
     if (element) {
@@ -126,8 +126,8 @@ const buildInsights = (state, lines) => {
         status: state?.status || null,
         message: state?.message || null,
         architecture: architectureMatch
-            ? `${architectureMatch[1]} capa oculta / ${architectureMatch[2]} neuronas / ${architectureMatch[3]} epocas`
-            : '1 capa oculta / 6 neuronas / 220 epocas',
+            ? `${architectureMatch[1]} capa oculta / ${architectureMatch[2]} neuronas / ${architectureMatch[3]} épocas`
+            : '1 capa oculta / 6 neuronas / 220 épocas',
         hasContext: Boolean(current.algo || current.objective || lines.length),
         hasEnoughSamples: samplesMatch ? Number(samplesMatch[1]) >= 8 : false,
         hasTraining: Boolean(hasTrainingLine || state?.status === 'pending' || state?.status === 'ok'),
@@ -203,7 +203,7 @@ export function initNeuralStatus({ root }) {
         if (!candidate || !candidate.parameters) {
             suggestedParams.innerHTML = `
                 <div class="rounded-[14px] border border-dashed border-white/10 px-4 py-5 text-sm text-[color:var(--ink-dim)]">
-                    Aun no hay una recomendacion almacenada.
+                    Aún no hay una recomendación almacenada.
                 </div>
             `;
             setText(suggestionContext, 'Sin sugerencia');
@@ -238,7 +238,7 @@ export function initNeuralStatus({ root }) {
         }
 
         setText(consoleCount, eventCount ? `${eventCount} eventos` : '0 eventos');
-        setText(consoleHint, insights.message || (eventCount ? 'Se cargaron eventos del ultimo entrenamiento.' : defaultConsoleHint));
+        setText(consoleHint, insights.message || (eventCount ? 'Se cargaron eventos del último entrenamiento.' : defaultConsoleHint));
         setText(lastMessage, insights.message || defaultLastMessage);
         setText(lastAlgorithm, formatLabel(insights.algorithm, algorithmLabels));
         setText(lastObjective, formatLabel(insights.objective, objectiveLabels));
@@ -267,16 +267,16 @@ export function initNeuralStatus({ root }) {
         }
 
         if (networkPhase === 'trained') {
-            setText(architectureStatus, 'La red ya produjo una sugerencia util');
-            setText(signalState, 'Senal estable');
+            setText(architectureStatus, 'La red ya produjo una sugerencia útil');
+            setText(signalState, 'Señal estable');
             setText(inferenceState, 'Sugerencia lista para aplicar en el simulador');
-            setText(quickRead, 'La corrida mas reciente completo dataset, entrenamiento e inferencia. La salida representa una recomendacion concreta de parametros.');
+            setText(quickRead, 'La corrida más reciente completó dataset, entrenamiento e inferencia. La salida representa una recomendación concreta de parámetros.');
             setText(logSummary, 'Entrenamiento completo');
         } else if (networkPhase === 'training') {
-            setText(architectureStatus, 'La capa oculta esta procesando patrones del historial');
+            setText(architectureStatus, 'La capa oculta está procesando patrones del historial');
             setText(signalState, 'Entrenando');
-            setText(inferenceState, 'Se detecto actividad de entrenamiento reciente');
-            setText(quickRead, 'Las conexiones entre capas se activan porque la red encontro suficientes datos para empezar a ajustar pesos.');
+            setText(inferenceState, 'Se detectó actividad de entrenamiento reciente');
+            setText(quickRead, 'Las conexiones entre capas se activan porque la red encontró suficientes datos para empezar a ajustar pesos.');
             setText(logSummary, 'Entrenamiento en progreso');
         } else if (networkPhase === 'connected') {
             setText(architectureStatus, 'Servicio listo para recibir nuevas corridas');
@@ -285,29 +285,29 @@ export function initNeuralStatus({ root }) {
             setText(quickRead, 'El microservicio responde correctamente. Entrena desde el simulador para ver el comportamiento completo de la red.');
             setText(logSummary, eventCount ? 'Contexto almacenado' : 'Sin actividad reciente');
         } else {
-            setText(architectureStatus, 'El panel necesita que el servicio este disponible');
-            setText(signalState, 'Sin senal');
-            setText(inferenceState, 'No hay conexion con el microservicio');
-            setText(quickRead, 'Mientras el servicio este desconectado, solo se mostrara el ultimo entrenamiento guardado localmente.');
+            setText(architectureStatus, 'El panel necesita que el servicio esté disponible');
+            setText(signalState, 'Sin señal');
+            setText(inferenceState, 'No hay conexión con el microservicio');
+            setText(quickRead, 'Mientras el servicio esté desconectado, solo se mostrará el último entrenamiento guardado localmente.');
             setText(logSummary, eventCount ? 'Historial local disponible' : 'Sin actividad reciente');
         }
 
         const captureCopy = insights.algorithm || insights.objective
             ? `${formatLabel(insights.algorithm, algorithmLabels)} con ${formatLabel(insights.objective, objectiveLabels)} listo para analizar.`
-            : 'Aun no se detectan datos recientes del simulador.';
+            : 'Aún no se detectan datos recientes del simulador.';
         const datasetCopy = insights.samples !== null
             ? insights.hasEnoughSamples
-                ? `${insights.samples} muestras validas y ${insights.dimensions ?? '-'} dimensiones disponibles para normalizar.`
-                : `${insights.samples} muestras validas detectadas. Aun faltan registros para llegar al minimo de 8.`
-            : 'Se necesitan al menos 8 simulaciones validas para construir el dataset.';
+                ? `${insights.samples} muestras válidas y ${insights.dimensions ?? '-'} dimensiones disponibles para normalizar.`
+                : `${insights.samples} muestras válidas detectadas. Aún faltan registros para llegar al mínimo de 8.`
+            : 'Se necesitan al menos 8 simulaciones válidas para construir el dataset.';
         const trainingCopy = insights.hasTraining
-            ? `Arquitectura ${insights.architecture}. La red ajusta pesos con activacion ReLU para reducir la loss.`
+            ? `Arquitectura ${insights.architecture}. La red ajusta pesos con activación ReLU para reducir la loss.`
             : 'Cuando inicia el entrenamiento, la capa oculta combina pesos y activaciones para reducir la loss.';
         const suggestionCopy = insights.hasSuggestion
             ? `La red ya produjo una sugerencia para ${formatLabel(insights.algorithm, algorithmLabels)}.`
             : insights.notEnoughSamples
-                ? 'No fue posible generar sugerencia porque aun no hay suficientes simulaciones validas.'
-                : 'La salida final recomienda parametros para el algoritmo activo.';
+                ? 'No fue posible generar sugerencia porque aún no hay suficientes simulaciones válidas.'
+                : 'La salida final recomienda parámetros para el algoritmo activo.';
 
         setStepState(stepCapture, insights.hasContext ? 'done' : 'pending', captureCopy);
         setStepState(
@@ -366,7 +366,7 @@ export function initNeuralStatus({ root }) {
     const checkStatus = async () => {
         setState({
             status: 'checking',
-            message: 'Verificando conexion con el microservicio...',
+            message: 'Verificando conexión con el microservicio...',
             latency: null,
             serviceUrl: null,
             payload: null,
