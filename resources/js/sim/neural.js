@@ -159,7 +159,7 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
             return `Sugerencia (Firefly): beta ${format(params.beta)}, gamma ${format(params.gamma)}, alpha ${format(params.alpha)}.`;
         }
         if (algo === 'ga') {
-            return `Sugerencia (GA): elite ${format(params.elite)}, mutacion ${format(params.mutation)}, cruce ${format(params.crossover)}.`;
+            return `Sugerencia (GA): elite ${format(params.elite)}, mutación ${format(params.mutation)}, cruce ${format(params.crossover)}.`;
         }
         if (algo === 'cuckoo') {
             return `Sugerencia (Cuckoo): pa ${format(params.pa)}, step ${format(params.step)}.`;
@@ -259,11 +259,11 @@ export function createNeuralAdvisor({ nnUrl, ui }) {
             setStatus('No se pudo entrenar la red neuronal.');
             setSuggestion('');
             applyButton.disabled = true;
-            storeLog('[client] error de conexion.');
+            storeLog('[client] error de conexión.');
             storeState({
                 checkedAt: new Date().toISOString(),
                 current,
-                log: ['[client] error de conexion.'],
+                log: ['[client] error de conexión.'],
                 message: 'No se pudo entrenar la red neuronal.',
                 status: 'error',
             });

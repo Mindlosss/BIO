@@ -14,9 +14,9 @@
                 <div class="max-w-2xl">
                     <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Simulador</div>
                     {{-- <div class="mt-2 max-w-[640px] leading-relaxed text-[color:var(--ink-dim)]">
-                        Simulador de algoritmos bioinspirados con vista 2D, vista 3D y grafica de convergencia.
-                        Elige el algoritmo y la funcion objetivo, define el modo de convergencia y personaliza
-                        los parametros para observar la busqueda en tiempo real.
+                        Simulador de algoritmos bioinspirados con vista 2D, vista 3D y gráfica de convergencia.
+                        Elige el algoritmo y la función objetivo, define el modo de convergencia y personaliza
+                        los parámetros para observar la búsqueda en tiempo real.
                     </div> --}}
                 </div>
             </header>
@@ -50,7 +50,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Funcion objetivo</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Función objetivo</label>
                             <div class="custom-select-container" id="objectiveSelectWrapper">
                                 <select id="objective" class="hidden">
                                     <option value="sphere" selected>Sphere</option>
@@ -95,24 +95,24 @@
                             <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Modo de convergencia</label>
                             <div class="custom-select-container" id="convergenceSelectWrapper">
                                 <select id="convergence" class="hidden">
-                                    <option value="exploracion">Exploracion</option>
+                                    <option value="exploracion">Exploración</option>
                                     <option value="equilibrado" selected>Equilibrado</option>
-                                    <option value="optimo">Optimo</option>
+                                    <option value="optimo">Óptimo</option>
                                 </select>
                                 <div class="select-trigger">
                                     <span class="current-value">Equilibrado</span>
                                     <svg class="h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                                 <div class="select-options">
-                                    <div class="custom-option" data-value="exploracion">Exploracion</div>
+                                    <div class="custom-option" data-value="exploracion">Exploración</div>
                                     <div class="custom-option selected" data-value="equilibrado">Equilibrado</div>
-                                    <div class="custom-option" data-value="optimo">Optimo</div>
+                                    <div class="custom-option" data-value="optimo">Óptimo</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="bounds">Dominio (limite)</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="bounds">Dominio (límite)</label>
                             <div class="grid grid-cols-[auto_1fr_auto] gap-2">
                                 <button type="button" onclick="stepInput('bounds', -1)" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
                                 <input id="bounds" type="number" min="2" max="20" step="1" value="5"
@@ -122,7 +122,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="pop">Poblacion</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="pop">Población</label>
                             <div class="grid grid-cols-[auto_1fr_auto] gap-2">
                                 <button type="button" onclick="stepInput('pop', -1)" class="h-full w-9 rounded-xl border border-white/15 bg-[rgba(25,38,33,0.92)] text-[color:var(--ink)] hover:bg-white/5 active:bg-white/10">-</button>
                                 <input id="pop" type="number" min="10" max="300" value="60"
@@ -142,7 +142,7 @@
                         </div>
 
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (camara lenta)</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]" for="speed">Velocidad (cámara lenta)</label>
                             <div class="grid grid-cols-[1fr_auto] items-center gap-3">
                                 <input id="speed" type="range" min="0.01" max="2.5" step="0.01" value="0.5"
                                     class="h-9 w-full accent-[rgb(43,209,167)]">
@@ -183,21 +183,21 @@
                             </span>
                         </label>
                         <div class="grid gap-2">
-                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Parametros</label>
+                            <label class="text-[0.72rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Parámetros</label>
                             <div class="param hidden grid gap-2 rounded-xl border border-white/10 bg-[rgba(12,18,16,0.6)] p-3" data-algo="pso">
-                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="Inercia alta = explora mas, baja = converge rapido.">
+                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="Inercia alta = explora más, baja = converge rápido.">
                                     <span>Inercia w</span>
                                     <span id="psoWValue" class="font-mono text-[rgb(43,209,167)]">0.72</span>
                                 </div>
                                 <input id="psoW" type="range" min="0.3" max="0.95" step="0.01" value="0.72"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
-                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="C1: atraccion a la mejor solucion propia.">
+                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="C1: atracción a la mejor solución propia.">
                                     <span>c1</span>
                                     <span id="psoC1Value" class="font-mono text-[rgb(43,209,167)]">1.5</span>
                                 </div>
                                 <input id="psoC1" type="range" min="0.5" max="3" step="0.05" value="1.5"
                                     class="h-9 w-full accent-[rgb(255,122,26)]">
-                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="C2: atraccion a la mejor solucion global.">
+                                <div class="flex items-center justify-between text-sm text-[color:var(--ink-dim)]" title="C2: atracción a la mejor solución global.">
                                     <span>c2</span>
                                     <span id="psoC2Value" class="font-mono text-[rgb(43,209,167)]">1.7</span>
                                 </div>
@@ -301,7 +301,7 @@
                         <div class="grid gap-2 text-[0.92rem] text-[color:var(--ink-dim)]">
                             <div id="algoTag" class="font-mono text-xs text-[rgb(255,122,26)]">PSO</div>
                             <div id="algoDesc">
-                                Enjambre de particulas con memoria personal y global para converger al optimo.
+                                Enjambre de partículas con memoria personal y global para converger al óptimo.
                             </div>
                         </div>
                         <div class="grid gap-3 rounded-[14px] border border-white/10 bg-[rgba(12,18,16,0.6)] p-4 text-sm text-[color:var(--ink-dim)]">
@@ -334,7 +334,7 @@
                     <div class="grid gap-3 rounded-[18px] border border-white/10 bg-[rgba(16,23,20,0.68)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[8px] animate-[floatIn_0.8s_ease_both]">
                         <div class="flex items-center justify-between gap-3 text-[0.95rem] text-[color:var(--ink-dim)]">
                             <div>Vista 3D (superficie + agentes)</div>
-                            <div class="font-mono text-xs text-[color:var(--ink-dim)]">Proyeccion isometrica</div>
+                            <div class="font-mono text-xs text-[color:var(--ink-dim)]">Proyección isométrica</div>
                         </div>
                         <canvas id="canvas3d"
                             class="h-[320px] w-full rounded-[14px] border border-white/10 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.08),transparent_55%),rgba(8,12,10,0.85)]"></canvas>
@@ -342,7 +342,7 @@
                     <div class="grid gap-3 rounded-[18px] border border-white/10 bg-[rgba(16,23,20,0.68)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[8px] animate-[floatIn_0.8s_ease_both]">
                         <div class="flex items-center justify-between gap-3 text-[0.95rem] text-[color:var(--ink-dim)]">
                             <div>Convergencia</div>
-                            <div class="font-mono text-xs text-[color:var(--ink-dim)]">Mejor fitness por iteracion</div>
+                            <div class="font-mono text-xs text-[color:var(--ink-dim)]">Mejor fitness por iteración</div>
                         </div>
                         <div id="chartLegend" class="flex flex-wrap gap-3 text-xs text-[color:var(--ink-dim)]"></div>
                         <canvas id="canvasChart"

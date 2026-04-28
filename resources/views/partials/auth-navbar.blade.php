@@ -10,7 +10,7 @@
             </a>
             <a href="{{ route('comparison') }}"
                 class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('comparison') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">
-                Modo comparacion
+                Modo comparación
             </a>
             <a href="{{ route('history.index') }}"
                 class="rounded-full border px-3 py-1 uppercase tracking-[0.2em] {{ request()->routeIs('history.*') ? 'border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.16)] text-[rgb(43,209,167)]' : 'border-white/10 text-[color:var(--ink-dim)]' }}">

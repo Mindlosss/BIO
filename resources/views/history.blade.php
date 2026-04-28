@@ -13,10 +13,6 @@
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div class="max-w-2xl">
                     <div class="text-[clamp(2rem,3vw,3.1rem)] font-bold tracking-tight">Historial de simulaciones</div>
-                    {{-- <div class="mt-2 text-sm text-[color:var(--ink-dim)]">Tus ultimas simulaciones guardadas con parametros y resultados.</div> --}}
-                </div>
-                <div class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
-                    Total: {{ $histories->count() }}
                 </div>
             </header>
 
@@ -29,7 +25,7 @@
                 });
             @endphp
 
-            <section class="grid gap-3">
+            <section class="grid gap-4">
                 @forelse ($grouped as $group)
                     @php
                         $first = $group->first();
@@ -37,48 +33,53 @@
                     @endphp
 
                     @if ($isBatch)
-                        <details class="group rounded-[18px] border border-white/10 bg-[rgba(14,20,18,0.75)] p-4 shadow-[0_24px_55px_rgba(0,0,0,0.35)] backdrop-blur-[12px]">
-                            <summary class="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--ink-dim)]">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="rounded-full border border-[rgba(255,122,26,0.6)] bg-[rgba(255,122,26,0.12)] px-2 py-1 uppercase tracking-[0.2em] text-[color:var(--ink)]">
-                                        Comparacion
-                                    </span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
-                                        Lote {{ $first->batch_id }}
-                                    </span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
-                                        {{ $group->count() }} algoritmos
-                                    </span>
+                        <details class="group overflow-hidden rounded-[22px] border border-[rgba(255,122,26,0.22)] bg-[rgba(14,20,18,0.78)] shadow-[0_24px_60px_rgba(0,0,0,0.36)] backdrop-blur-[12px] transition hover:border-[rgba(255,122,26,0.42)]">
+                            <summary class="grid cursor-pointer list-none gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                                <div class="flex min-w-0 flex-wrap items-center gap-3">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[rgba(255,122,26,0.28)] bg-[rgba(255,122,26,0.14)] font-mono text-sm font-bold text-[rgb(255,194,149)]">
+                                        {{ $group->count() }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="rounded-full border border-[rgba(255,122,26,0.6)] bg-[rgba(255,122,26,0.14)] px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink)]">
+                                                Comparación
+                                            </span>
+                                            <span class="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
+                                                Lote {{ $first->batch_id }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-2 text-lg font-semibold text-[color:var(--ink)]">
+                                            {{ $group->count() }} algoritmos comparados
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <span>{{ $first->created_at->format('d/m/Y H:i') }}</span>
-                                    <span class="text-[0.7rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)] group-open:text-[color:var(--ink)]">
+                                <div class="flex items-center justify-between gap-4 text-xs text-[color:var(--ink-dim)] sm:justify-end">
+                                    <span class="font-mono">{{ $first->created_at->format('d/m/Y H:i') }}</span>
+                                    <span class="rounded-full border border-white/10 px-3 py-1 uppercase tracking-[0.2em] transition group-open:border-[rgba(43,209,167,0.45)] group-open:text-[rgb(43,209,167)]">
                                         Detalles
                                     </span>
                                 </div>
                             </summary>
-                            <div class="mt-3 grid gap-3">
+                            <div class="grid gap-3 border-t border-white/10 bg-[rgba(6,9,8,0.22)] p-4">
                                 @foreach ($group as $history)
-                                    <article class="grid gap-2 rounded-[14px] border border-white/10 bg-[rgba(12,18,16,0.6)] p-3 text-xs text-[color:var(--ink-dim)]">
-                                        <div class="flex flex-wrap items-center justify-between gap-2">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em]">{{ $history->algo }}</span>
-                                                <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em]">{{ $history->objective }}</span>
-                                                <span class="rounded-full border border-[rgba(43,209,167,0.4)] bg-[rgba(43,209,167,0.12)] px-2 py-1 text-[color:var(--ink)]">
-                                                    Mejor f: {{ data_get($history->metrics, 'best.f') ?? '-' }}
-                                                </span>
+                                    <article class="grid gap-3 rounded-[16px] border border-white/10 bg-[rgba(12,18,16,0.72)] p-4 text-xs text-[color:var(--ink-dim)] transition hover:border-white/20">
+                                        <div class="flex flex-wrap items-start justify-between gap-3">
+                                            <div>
+                                                <div class="font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[rgb(255,122,26)]">{{ $history->algo }}</div>
+                                                <div class="mt-1 text-base font-semibold text-[color:var(--ink)]">{{ $history->objective }}</div>
                                             </div>
-                                            <div class="text-[0.7rem] text-[color:var(--ink-dim)]">{{ $history->created_at->format('H:i') }}</div>
+                                            <div class="rounded-[14px] border border-[rgba(43,209,167,0.28)] bg-[rgba(43,209,167,0.09)] px-3 py-2 text-right">
+                                                <div class="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--ink-dim)]">Mejor f</div>
+                                                <div class="mt-1 font-mono text-sm font-semibold text-[rgb(43,209,167)]">{{ data_get($history->metrics, 'best.f') ?? '-' }}</div>
+                                            </div>
                                         </div>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Dominio: <span class="text-[color:var(--ink)]">±{{ $history->bounds }}</span></span>
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Poblacion: <span class="text-[color:var(--ink)]">{{ $history->population }}</span></span>
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Iter: <span class="text-[color:var(--ink)]">{{ $history->iterations }}</span></span>
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Semilla: <span class="text-[color:var(--ink)]">{{ $history->seed }}</span></span>
-                                        </div>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Promedio f: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'avg_f') ?? '-' }}</span></span>
-                                            <span class="rounded-full border border-white/10 px-2 py-1">Diversidad: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'diversity') ?? '-' }}</span></span>
+                                        <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Dominio <span class="block font-mono text-[color:var(--ink)]">±{{ $history->bounds }}</span></div>
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Población <span class="block font-mono text-[color:var(--ink)]">{{ $history->population }}</span></div>
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Iter <span class="block font-mono text-[color:var(--ink)]">{{ $history->iterations }}</span></div>
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Semilla <span class="block font-mono text-[color:var(--ink)]">{{ $history->seed }}</span></div>
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Promedio f <span class="block font-mono text-[color:var(--ink)]">{{ data_get($history->metrics, 'avg_f') ?? '-' }}</span></div>
+                                            <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Diversidad <span class="block font-mono text-[color:var(--ink)]">{{ data_get($history->metrics, 'diversity') ?? '-' }}</span></div>
                                         </div>
                                     </article>
                                 @endforeach
@@ -88,41 +89,66 @@
                         @php
                             $history = $group->first();
                         @endphp
-                        <details class="group rounded-[16px] border border-white/10 bg-[rgba(17,25,22,0.72)] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.32)] backdrop-blur-[12px]">
-                            <summary class="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--ink-dim)]">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em]">Normal</span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em]">{{ $history->algo }}</span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1 uppercase tracking-[0.2em]">{{ $history->objective }}</span>
-                                    <span class="rounded-full border border-[rgba(43,209,167,0.4)] bg-[rgba(43,209,167,0.12)] px-2 py-1 text-[color:var(--ink)]">
-                                        Mejor f: {{ data_get($history->metrics, 'best.f') ?? '-' }}
-                                    </span>
+                        <details class="group overflow-hidden rounded-[22px] border border-white/10 bg-[rgba(17,25,22,0.76)] shadow-[0_20px_50px_rgba(0,0,0,0.32)] backdrop-blur-[12px] transition hover:border-[rgba(43,209,167,0.34)] open:border-[rgba(43,209,167,0.42)]">
+                            <summary class="grid cursor-pointer list-none gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                                <div class="flex min-w-0 flex-wrap items-center gap-3">
+                                    <div class="flex h-11 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-[rgba(43,209,167,0.24)] bg-[rgba(43,209,167,0.1)] px-1 text-center font-mono text-[clamp(0.48rem,1.4vw,0.68rem)] font-bold uppercase leading-none text-[rgb(43,209,167)]">
+                                        {{ $history->algo }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="rounded-full border border-[rgba(43,209,167,0.45)] bg-[rgba(43,209,167,0.1)] px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink)]">
+                                                Normal
+                                            </span>
+                                            <span class="max-w-full break-words rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
+                                                {{ $history->objective }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-2 min-w-0 text-lg font-semibold text-[color:var(--ink)]">
+                                            <span class="break-words">{{ strtoupper($history->algo) }}</span>
+                                            <span class="text-[color:var(--ink-dim)]">en</span>
+                                            <span class="break-words">{{ $history->objective }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <span>{{ $history->created_at->format('d/m/Y H:i') }}</span>
-                                    <span class="text-[0.7rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)] group-open:text-[color:var(--ink)]">
+                                <div class="flex items-center justify-between gap-3 text-xs text-[color:var(--ink-dim)] sm:justify-end sm:min-w-[260px]">
+                                    <span class="font-mono">
+                                        {{ $history->created_at->format('d/m/Y H:i') }}
+                                    </span>
+                                    <span class="rounded-full border border-white/10 px-3 py-1 uppercase tracking-[0.2em] transition group-open:border-[rgba(43,209,167,0.45)] group-open:text-[rgb(43,209,167)]">
                                         Detalles
                                     </span>
                                 </div>
                             </summary>
-                            <div class="mt-3 grid gap-2 text-xs text-[color:var(--ink-dim)] sm:grid-cols-2">
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-2 py-1">Dominio: <span class="text-[color:var(--ink)]">±{{ $history->bounds }}</span></span>
-                                    <span class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-2 py-1">Poblacion: <span class="text-[color:var(--ink)]">{{ $history->population }}</span></span>
-                                    <span class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-2 py-1">Iter: <span class="text-[color:var(--ink)]">{{ $history->iterations }}</span></span>
-                                    <span class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-2 py-1">Semilla: <span class="text-[color:var(--ink)]">{{ $history->seed }}</span></span>
-                                    <span class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-2 py-1">Convergencia: <span class="text-[color:var(--ink)]">{{ $history->convergence ?? 'Equilibrado' }}</span></span>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="rounded-full border border-white/10 px-2 py-1">Promedio f: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'avg_f') ?? '-' }}</span></span>
-                                    <span class="rounded-full border border-white/10 px-2 py-1">Diversidad: <span class="text-[color:var(--ink)]">{{ data_get($history->metrics, 'diversity') ?? '-' }}</span></span>
-                                </div>
+                            <div class="grid gap-3 border-t border-white/10 bg-[rgba(6,9,8,0.22)] p-4">
+                                <article class="grid gap-3 rounded-[16px] border border-white/10 bg-[rgba(12,18,16,0.72)] p-4 text-xs text-[color:var(--ink-dim)]">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <div class="font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[rgb(43,209,167)]">{{ $history->algo }}</div>
+                                            <div class="mt-1 text-base font-semibold text-[color:var(--ink)]">{{ $history->objective }}</div>
+                                        </div>
+                                        <div class="rounded-[14px] border border-[rgba(43,209,167,0.28)] bg-[rgba(43,209,167,0.09)] px-3 py-2 text-right">
+                                            <div class="text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--ink-dim)]">Mejor f</div>
+                                            <div class="mt-1 break-all font-mono text-sm font-semibold text-[rgb(43,209,167)]">{{ data_get($history->metrics, 'best.f') ?? '-' }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-7">
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Dominio <span class="block font-mono text-[color:var(--ink)]">±{{ $history->bounds }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Población <span class="block font-mono text-[color:var(--ink)]">{{ $history->population }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Iter <span class="block font-mono text-[color:var(--ink)]">{{ $history->iterations }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Semilla <span class="block break-all font-mono text-[color:var(--ink)]">{{ $history->seed }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Convergencia <span class="block break-words font-mono text-[color:var(--ink)]">{{ $history->convergence ?? 'Equilibrado' }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Promedio f <span class="block break-all font-mono text-[color:var(--ink)]">{{ data_get($history->metrics, 'avg_f') ?? '-' }}</span></div>
+                                        <div class="rounded-[12px] border border-white/10 bg-white/[0.03] px-3 py-2">Diversidad <span class="block break-all font-mono text-[color:var(--ink)]">{{ data_get($history->metrics, 'diversity') ?? '-' }}</span></div>
+                                    </div>
+                                </article>
                             </div>
                         </details>
                     @endif
                 @empty
-                    <div class="rounded-[18px] border border-white/10 bg-[rgba(17,25,22,0.72)] p-8 text-center text-sm text-[color:var(--ink-dim)]">
-                        Aun no hay simulaciones guardadas. Ejecuta una simulacion y guarda el resultado.
+                    <div class="grid gap-3 rounded-[22px] border border-dashed border-white/15 bg-[rgba(17,25,22,0.72)] p-10 text-center text-sm text-[color:var(--ink-dim)]">
+                        <div class="text-lg font-semibold text-[color:var(--ink)]">Aún no hay simulaciones guardadas</div>
+                        <div>Ejecuta una simulación y guarda el resultado para verlo aquí.</div>
                     </div>
                 @endforelse
             </section>

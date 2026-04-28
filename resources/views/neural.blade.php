@@ -22,13 +22,13 @@
                         Red neuronal
                     </div>
                     <div id="nnStatusMessage" class="mt-3 text-sm leading-relaxed text-[color:var(--ink-dim)] sm:text-base">
-                        Verificando conexion con el microservicio...
+                        Verificando conexión con el microservicio...
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div id="nnArchitectureBadge"
                         class="rounded-full border border-[rgba(255,122,26,0.25)] bg-[rgba(255,122,26,0.1)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[rgb(255,194,149)]">
-                        1 capa oculta / 6 neuronas / 220 epocas
+                        1 capa oculta / 6 neuronas / 220 épocas
                     </div>
                     <div id="nnStatusBadge"
                         class="rounded-full border border-white/10 bg-[rgba(12,18,16,0.6)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">
@@ -51,7 +51,7 @@
                                 <span class="font-mono text-[rgb(43,209,167)]" id="nnFeatureCount">0 rasgos</span>
                             </div>
                             <div class="rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-1 text-[color:var(--ink-dim)]">
-                                <span id="nnSignalState">Sin senal</span>
+                                <span id="nnSignalState">Sin señal</span>
                             </div>
                             <div id="nnLogSummary" class="rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-1 text-[color:var(--ink-dim)]">
                                 Sin actividad reciente
@@ -147,18 +147,18 @@
                         </svg>
 
                         <div class="pointer-events-none absolute bottom-5 left-6 text-sm text-[color:var(--ink-dim)]">
-                            Historial, convergencia y parametros normalizados
+                            Historial, convergencia y parámetros normalizados
                         </div>
                         <div class="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-[color:var(--ink-dim)]">
-                            Patrones combinados con activacion ReLU
+                            Patrones combinados con activación ReLU
                         </div>
                         <div id="nnInferenceState" class="absolute bottom-5 right-6 rounded-full border border-[rgba(255,122,26,0.22)] bg-[rgba(255,122,26,0.08)] px-3 py-1 text-sm text-[color:var(--ink)]">
-                            Aun no hay sugerencia reciente
+                            Aún no hay sugerencia reciente
                         </div>
                     </div>
 
                     <div id="nnQuickRead" class="text-sm leading-relaxed text-[color:var(--ink-dim)]">
-                        Cuando el servicio este activo, la red mostrara el flujo de senal y el estado de la ultima sugerencia generada.
+                        Cuando el servicio esté activo, la red mostrará el flujo de señal y el estado de la última sugerencia generada.
                     </div>
                 </div>
 
@@ -171,7 +171,7 @@
                                 <div id="nnLastAlgorithm" class="mt-2 text-lg font-semibold text-[color:var(--ink)]">-</div>
                             </div>
                             <div class="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                                <div class="text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Funcion objetivo</div>
+                                <div class="text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Función objetivo</div>
                                 <div id="nnLastObjective" class="mt-2 text-lg font-semibold text-[color:var(--ink)]">-</div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
@@ -185,10 +185,10 @@
                                 </div>
                             </div>
                             <div class="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                                <div class="text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Ultima actividad</div>
+                                <div class="text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">Última actividad</div>
                                 <div id="nnLastRunAt" class="mt-2 text-base font-semibold text-[color:var(--ink)]">Sin registros</div>
                                 <div id="nnLastMessage" class="mt-2 text-sm leading-relaxed text-[color:var(--ink-dim)]">
-                                    La proxima corrida desde el simulador dejara aqui el resumen.
+                                    La próxima corrida desde el simulador dejará aquí el resumen.
                                 </div>
                             </div>
                         </div>
@@ -196,12 +196,12 @@
 
                     <section class="grid gap-3 rounded-[22px] border border-white/10 bg-[rgba(16,23,20,0.68)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-[8px]">
                         <div class="flex items-center justify-between gap-3">
-                            <div class="text-xs uppercase tracking-[0.24em] text-[color:var(--ink-dim)]">Parametros sugeridos</div>
+                            <div class="text-xs uppercase tracking-[0.24em] text-[color:var(--ink-dim)]">Parámetros sugeridos</div>
                             <div id="nnSuggestionContext" class="font-mono text-xs text-[color:var(--ink-dim)]">Sin sugerencia</div>
                         </div>
                         <div id="nnSuggestedParams" class="grid gap-2">
                             <div class="rounded-[14px] border border-dashed border-white/10 px-4 py-5 text-sm text-[color:var(--ink-dim)]">
-                                Aun no hay una recomendacion almacenada.
+                                Aún no hay una recomendación almacenada.
                             </div>
                         </div>
                     </section>
@@ -237,7 +237,7 @@
                         </article>
                         <article id="nnStepSuggestion" class="nn-step rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4" data-state="pending">
                             <div class="text-sm font-semibold text-[color:var(--ink)]">Sugerencia</div>
-                            <div data-step-copy class="mt-2 text-sm leading-relaxed text-[color:var(--ink-dim)]">Aun no disponible.</div>
+                            <div data-step-copy class="mt-2 text-sm leading-relaxed text-[color:var(--ink-dim)]">Aún no disponible.</div>
                         </article>
                     </div>
                 </div>
@@ -247,7 +247,7 @@
                         <div>
                             <div class="text-xs uppercase tracking-[0.24em] text-[color:var(--ink-dim)]">Consola</div>
                             <div id="nnConsoleHint" class="mt-2 text-sm text-[color:var(--ink-dim)]">
-                                Ultimos eventos del entrenamiento.
+                                Últimos eventos del entrenamiento.
                             </div>
                         </div>
                         <div id="nnConsoleCount" class="rounded-full border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-1 font-mono text-xs text-[color:var(--ink-dim)]">
@@ -260,7 +260,7 @@
                     <div class="flex flex-wrap gap-2">
                         <button id="nnStatusRefresh" type="button"
                             class="rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
-                            Revisar conexion
+                            Revisar conexión
                         </button>
                         <button id="nnConsoleClear" type="button"
                             class="rounded-xl border border-white/10 bg-[rgba(25,38,33,0.6)] px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink-dim)] transition hover:-translate-y-0.5">
@@ -269,7 +269,7 @@
                     </div>
 
                     <details class="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                        <summary class="cursor-pointer text-sm font-semibold text-[color:var(--ink)]">Detalles tecnicos</summary>
+                        <summary class="cursor-pointer text-sm font-semibold text-[color:var(--ink)]">Detalles técnicos</summary>
                         <div class="mt-3 grid gap-3">
                             <div class="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3">
                                 <div class="text-[0.68rem] uppercase tracking-[0.2em] text-[color:var(--ink-dim)]">URL</div>

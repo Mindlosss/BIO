@@ -3,7 +3,7 @@
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <div class="mb-6 grid gap-2">
-        <div class="text-lg font-semibold text-[color:var(--ink)]">Iniciar sesion</div>
+        <div class="text-lg font-semibold text-[color:var(--ink)]">Iniciar sesión</div>
         <div class="text-sm text-[color:var(--ink-dim)]">
             Accede al simulador para continuar con tus configuraciones.
         </div>

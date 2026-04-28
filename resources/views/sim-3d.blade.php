@@ -12,7 +12,7 @@
 
             <div class="grid gap-4 rounded-[18px] border border-white/20 bg-[rgba(26,36,31,0.74)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.3)] backdrop-blur-[8px]">
                 <div class="flex flex-wrap items-center justify-between gap-3 text-[color:var(--ink)]">
-                    <div class="text-sm uppercase tracking-[0.25em]">Simulacion 3D</div>
+                    <div class="text-sm uppercase tracking-[0.25em]">Simulación 3D</div>
                     <button type="button"
                         class="rounded-full border border-white/20 bg-[rgba(255,255,255,0.04)] px-3 py-1 text-xs text-[color:var(--ink)] transition hover:bg-[rgba(255,255,255,0.09)]"
                         onclick="window.close(); setTimeout(() => { if (!window.closed) window.location.href = '{{ route('home') }}'; }, 150);">
@@ -25,8 +25,8 @@
                     <div class="grid content-start gap-3 rounded-[16px] border border-white/20 bg-[rgba(24,34,30,0.72)] p-4 text-sm text-[color:var(--ink)]">
                         <div class="font-mono text-xs uppercase tracking-[0.2em] text-[rgb(43,209,167)]">Datos</div>
                         <div>Algoritmo: <span id="algoLabel" class="text-[color:var(--ink)]">-</span></div>
-                        <div>Funcion: <span id="objectiveLabel" class="text-[color:var(--ink)]">-</span></div>
-                        <div>Iteracion: <span id="iterLabel" class="text-[color:var(--ink)]">0</span></div>
+                        <div>Función: <span id="objectiveLabel" class="text-[color:var(--ink)]">-</span></div>
+                        <div>Iteración: <span id="iterLabel" class="text-[color:var(--ink)]">0</span></div>
                         <div>Mejor f: <span id="bestLabel" class="text-[color:var(--ink)]">-</span></div>
                         <div id="legend" class="flex flex-wrap items-center gap-3 text-xs text-[color:var(--ink)]"></div>
                         <button id="replay3d" type="button"

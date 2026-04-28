@@ -11,7 +11,9 @@ class SimulationHistoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $histories = $request->user()
+        $user = $request->user();
+
+        $histories = $user
             ->simulationHistories()
             ->latest()
             ->take(30)
