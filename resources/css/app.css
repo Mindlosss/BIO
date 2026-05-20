@@ -36,3 +36,59 @@ body[data-page="bio-neural"] {
         transform: translateY(0);
     }
 }
+
+body[data-page="bio-3d"] #three-shell:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    padding: 1rem;
+    background: linear-gradient(135deg, #0b1110, #15231f);
+}
+
+body[data-page="bio-3d"] #three-shell:fullscreen #three-root {
+    height: calc(100vh - 2rem);
+    max-height: none;
+}
+
+.algorithm-code-grid {
+    display: grid;
+    gap: 0.35rem;
+    max-height: min(44vh, 420px);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.algorithm-code-line {
+    display: grid;
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: start;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.55rem;
+    background: rgba(0, 0, 0, 0.16);
+    padding: 0.45rem 0.55rem;
+    color: rgba(243, 239, 231, 0.62);
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.algorithm-code-line[data-active="true"] {
+    border-color: rgba(255, 122, 26, 0.72);
+    background: rgba(255, 122, 26, 0.16);
+    box-shadow: 0 0 22px rgba(255, 122, 26, 0.16);
+    color: var(--ink);
+}
+
+.algorithm-code-line-number {
+    color: rgba(43, 209, 167, 0.72);
+    text-align: right;
+}
+
+.algorithm-code-line[data-active="true"] .algorithm-code-line-number {
+    color: rgb(255, 210, 138);
+}

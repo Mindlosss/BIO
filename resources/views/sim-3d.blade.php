@@ -19,8 +19,8 @@
                         Volver al simulador
                     </button>
                 </div>
-                <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                    <div id="three-root" class="min-h-[360px] h-[60vh] max-h-[640px] w-full overflow-hidden rounded-[16px] border border-white/20 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.10),transparent_65%),rgba(18,24,22,0.95)]"></div>
+                <div id="three-shell" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+                    <div id="three-root" class="min-h-[420px] h-[72vh] max-h-[820px] w-full overflow-hidden rounded-[16px] border border-white/20 bg-[radial-gradient(circle_at_20%_20%,rgba(43,209,167,0.10),transparent_65%),rgba(18,24,22,0.95)]"></div>
                     
                     <div class="grid content-start gap-3 rounded-[16px] border border-white/20 bg-[rgba(24,34,30,0.72)] p-4 text-sm text-[color:var(--ink)]">
                         <div class="font-mono text-xs uppercase tracking-[0.2em] text-[rgb(43,209,167)]">Datos</div>
@@ -29,10 +29,21 @@
                         <div>Iteración: <span id="iterLabel" class="text-[color:var(--ink)]">0</span></div>
                         <div>Mejor f: <span id="bestLabel" class="text-[color:var(--ink)]">-</span></div>
                         <div id="legend" class="flex flex-wrap items-center gap-3 text-xs text-[color:var(--ink)]"></div>
-                        <button id="replay3d" type="button"
-                            class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
-                            Ver de nuevo
-                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="replay3d" type="button"
+                                class="mt-2 rounded-xl border border-[rgba(43,209,167,0.6)] bg-[rgba(43,209,167,0.15)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                Ver de nuevo
+                            </button>
+                            <button id="fullscreen3d" type="button"
+                                class="mt-2 rounded-xl border border-[rgba(255,122,26,0.55)] bg-[rgba(255,122,26,0.14)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--ink)] transition hover:-translate-y-0.5">
+                                Pantalla
+                            </button>
+                        </div>
+                        <div class="mt-2 grid gap-2 rounded-[14px] border border-white/10 bg-[rgba(8,12,10,0.52)] p-3">
+                            <div class="font-mono text-xs uppercase tracking-[0.2em] text-[rgb(255,122,26)]">Ejecucion del codigo</div>
+                            <div id="algorithmPhase" class="min-h-5 text-xs text-[color:var(--ink-dim)]">Preparando algoritmo...</div>
+                            <div id="algorithmTrace" class="algorithm-code-grid"></div>
+                        </div>
                         <div class="text-xs text-[color:var(--ink)]">
                             <div class="font-bold mb-1">Navegación:</div>
                             <div>Clic izquierdo para rotar | Clic derecho para mover a los lados | Rueda para zoom</div>
